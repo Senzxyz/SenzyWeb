@@ -113,11 +113,6 @@
     </footer>
 
     <script>
-        // สั่งรีเฟรชหน้าเว็บทั้งเว็บทุก 3 วินาทีเป๊ะๆ
-        setInterval(() => {
-            window.location.reload();
-        }, 3000);
-
         let supabaseClient = null;
         let ADMIN_UUID = '';
         
@@ -169,10 +164,24 @@
                 await incrementViews();
                 await initGames();
                 updateNavbarAuth();
+                setupRealtimeSubscriptions();
 
             } catch (err) {
                 console.error("Initialization error:", err);
             }
+        }
+
+        // เปิดระบบ Realtime ฟังการเปลี่ยนแปลงจาก Supabase ฐานข้อมูลโดยตรง
+        function setupRealtimeSubscriptions() {
+            supabaseClient
+                .channel('public-db-changes')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'games' }, payload => {
+                    initGames(true);
+                })
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'site_stats' }, payload => {
+                    fetchStats(true);
+                })
+                .subscribe();
         }
 
         async function fetchDiscordProfile() {
