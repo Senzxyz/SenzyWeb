@@ -714,12 +714,12 @@
             const placeId = document.getElementById('edit-placeid').value.trim();
             const name = document.getElementById('edit-name').value.trim();
             const thumbnail = document.getElementById('edit-thumb').value.trim();
-            const statusVal = document.getElementById('edit-status').value;
+            const statusVal = document.getElementById('edit-status').value; // ดึงค่าจาก Select ชัดเจน
             const featuresInput = document.getElementById('edit-features').value.trim();
             const statusEl = document.getElementById('edit-status-text');
             const btn = document.getElementById('update-game-btn');
 
-            statusEl.textContent = "⏳ Updating game...";
+            statusEl.textContent = "⏳ Updating game status to [" + statusVal + "]...";
             statusEl.className = "text-xs text-center text-yellow-400 mt-2";
             btn.disabled = true;
 
@@ -739,15 +739,14 @@
 
                 if (error) throw error;
 
-                statusEl.textContent = "✅ Game updated successfully!";
+                statusEl.textContent = "✅ Updated to " + statusVal + " successfully!";
                 statusEl.className = "text-xs text-center text-emerald-400 mt-2";
                 
-                // ดึงข้อมูลเกมใหม่ในเครื่องทันที ป้องกันจังหวะหน่วง
                 await initGames(false);
 
                 setTimeout(() => {
                     router.navigate('detail', slugify(name));
-                }, 1000);
+                }, 800);
             } catch (err) {
                 console.error("Update Error:", err);
                 statusEl.textContent = "❌ Failed: " + (err.message || "Unknown error");
