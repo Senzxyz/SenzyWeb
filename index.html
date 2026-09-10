@@ -315,68 +315,67 @@
 
         function renderHome() {
             return `
-                <div class="space-y-24 pb-12">
-                    <section class="relative pt-20 pb-12 text-center px-4">
-                        <div class="max-w-3xl mx-auto space-y-6">
+                <div class="space-y-20 pb-12">
+                    <!-- HERO & PROMINENT LOADER -->
+                    <section class="relative pt-12 pb-8 text-center px-4">
+                        <div class="max-w-4xl mx-auto space-y-8">
                             <div class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-pink-500/10 text-pink-400 border border-pink-500/20 shadow-inner">
                                 <span>${loadedGames.length}+ Supported Games & Counting</span>
                             </div>
-                            <h1 class="text-4xl sm:text-6xl font-extrabold tracking-tight text-white">One Loader. Every Supported Game.</h1>
-                            <p class="text-base sm:text-lg text-neutral-400 max-w-2xl mx-auto">Use a single loader from <span class="text-pink-400 font-semibold">SENZY HUB</span> to automatically detect and run supported games instantly.</p>
+                            <div class="space-y-3">
+                                <h1 class="text-4xl sm:text-6xl font-extrabold tracking-tight text-white">One Loader. Every Supported Game.</h1>
+                                <p class="text-base sm:text-lg text-neutral-400 max-w-2xl mx-auto">Use a single loader from <span class="text-pink-400 font-semibold">SENZY HUB</span> to automatically detect and run supported games instantly.</p>
+                            </div>
                             
-                            <div class="flex justify-center items-center gap-6 pt-4">
-                                <div class="px-6 py-3 rounded-xl bg-[#101014] border border-pink-500/30 shadow-xl shadow-pink-500/5">
+                            <!-- STATS COUNTER -->
+                            <div class="flex justify-center items-center gap-6">
+                                <div class="px-6 py-2.5 rounded-xl bg-[#101014] border border-pink-500/30 shadow-xl shadow-pink-500/5">
                                     <p class="text-[11px] text-neutral-400 uppercase tracking-wider font-semibold">Total Views</p>
-                                    <p id="stat-views" class="text-3xl font-extrabold text-pink-400 mt-1">${stats.views.toLocaleString()}</p>
+                                    <p id="stat-views" class="text-2xl font-extrabold text-pink-400 mt-0.5">${stats.views.toLocaleString()}</p>
                                 </div>
-                                <div class="px-6 py-3 rounded-xl bg-[#101014] border border-pink-500/30 shadow-xl shadow-pink-500/5">
+                                <div class="px-6 py-2.5 rounded-xl bg-[#101014] border border-pink-500/30 shadow-xl shadow-pink-500/5">
                                     <p class="text-[11px] text-neutral-400 uppercase tracking-wider font-semibold">Script Copies</p>
-                                    <p id="stat-copies" class="text-3xl font-extrabold text-pink-400 mt-1">${stats.copies.toLocaleString()}</p>
+                                    <p id="stat-copies" class="text-2xl font-extrabold text-pink-400 mt-0.5">${stats.copies.toLocaleString()}</p>
                                 </div>
                             </div>
 
-                            <div class="flex flex-col sm:flex-row justify-center items-center space-y-3 sm:space-y-0 sm:space-x-4 pt-4">
-                                <a href="#loader" class="w-full sm:w-auto px-6 py-3 rounded-lg bg-pink-500 text-white font-semibold text-sm hover:bg-pink-600 transition-colors text-center shadow-lg shadow-pink-500/25">Get Loader</a>
-                                <button onclick="router.navigate('games')" class="w-full sm:w-auto px-6 py-3 rounded-lg bg-[#101014] text-white font-semibold text-sm border border-white/[0.1] hover:border-pink-500/50 transition-colors">Browse Games</button>
-                            </div>
-                        </div>
-                    </section>
-
-                    <section id="loader" class="max-w-4xl mx-auto px-4">
-                        <div class="text-center mb-8 space-y-2">
-                            <h2 class="text-2xl font-bold text-white">Universal Loader</h2>
-                            <p class="text-sm text-neutral-400">Copy and execute the script below in your executor.</p>
-                        </div>
-                        <div class="w-full max-w-3xl mx-auto rounded-2xl bg-[#101014] border-2 border-pink-500/40 overflow-hidden shadow-2xl shadow-pink-500/10">
-                            <div class="flex items-center justify-between px-5 py-3.5 bg-[#15151a] border-b border-pink-500/20">
-                                <div class="flex items-center space-x-2">
-                                    <div class="w-3 h-3 rounded-full bg-pink-500/80 animate-pulse"></div>
-                                    <div class="w-3 h-3 rounded-full bg-neutral-600"></div>
-                                    <div class="w-3 h-3 rounded-full bg-neutral-600"></div>
-                                    <span class="text-xs text-pink-300 font-mono font-semibold ml-2">SENZY_LOADER.lua</span>
-                                </div>
-                                <div class="relative">
-                                    <button onclick="copyLoader()" id="copy-btn-text" class="flex items-center space-x-2 px-4 py-2 rounded-lg bg-pink-500 hover:bg-pink-600 text-xs font-bold text-white transition-all shadow-lg shadow-pink-500/30">
-                                        <i data-lucide="copy" class="w-4 h-4"></i>
-                                        <span>Copy Script</span>
-                                    </button>
-                                    <div id="toast-notification" class="hidden absolute right-0 -bottom-12 bg-[#1a1a22] border border-pink-500/40 text-emerald-300 text-xs px-4 py-1.5 rounded-lg shadow-xl whitespace-nowrap animate-fade-in font-medium flex items-center space-x-1.5">
-                                        <i data-lucide="check-circle" class="w-3.5 h-3.5"></i>
-                                        <span>Script copied successfully!</span>
+                            <!-- PROMINENT UNIVERSAL LOADER BOX -->
+                            <div class="w-full max-w-3xl mx-auto rounded-2xl bg-[#101014] border-2 border-pink-500/50 overflow-hidden shadow-2xl shadow-pink-500/20 text-left mt-6">
+                                <div class="flex items-center justify-between px-5 py-3.5 bg-[#15151a] border-b border-pink-500/20">
+                                    <div class="flex items-center space-x-2">
+                                        <div class="w-3 h-3 rounded-full bg-pink-500/80 animate-pulse"></div>
+                                        <div class="w-3 h-3 rounded-full bg-neutral-600"></div>
+                                        <div class="w-3 h-3 rounded-full bg-neutral-600"></div>
+                                        <span class="text-xs text-pink-300 font-mono font-semibold ml-2">SENZY_LOADER.lua</span>
+                                    </div>
+                                    <div class="relative">
+                                        <button onclick="copyLoader()" id="copy-btn-text" class="flex items-center space-x-2 px-4 py-2 rounded-lg bg-pink-500 hover:bg-pink-600 text-xs font-bold text-white transition-all shadow-lg shadow-pink-500/30">
+                                            <i data-lucide="copy" class="w-4 h-4"></i>
+                                            <span>Copy Script</span>
+                                        </button>
+                                        <div id="toast-notification" class="hidden absolute right-0 -bottom-12 bg-[#1a1a22] border border-pink-500/40 text-emerald-300 text-xs px-4 py-1.5 rounded-lg shadow-xl whitespace-nowrap animate-fade-in font-medium flex items-center space-x-1.5 z-50">
+                                            <i data-lucide="check-circle" class="w-3.5 h-3.5"></i>
+                                            <span>Script copied successfully!</span>
+                                        </div>
                                     </div>
                                 </div>
+                                <div class="p-4 font-mono text-xs sm:text-sm text-pink-300 bg-[#0c0c0f] overflow-x-auto select-all">
+                                    <code>${siteConfig.loaderUrl}</code>
+                                </div>
                             </div>
-                            <div class="p-5 font-mono text-xs sm:text-sm text-pink-300 bg-[#0c0c0f] overflow-x-auto select-all">
-                                <code>${siteConfig.loaderUrl}</code>
+
+                            <div class="flex justify-center pt-2">
+                                <button onclick="router.navigate('games')" class="px-6 py-2.5 rounded-lg bg-[#101014] text-white font-semibold text-sm border border-white/[0.1] hover:border-pink-500/50 transition-colors">Browse Supported Games (${loadedGames.length})</button>
                             </div>
                         </div>
                     </section>
 
+                    <!-- SUPPORTED GAMES PREVIEW -->
                     <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                         <div class="flex justify-between items-end mb-8">
                             <div>
-                                <h2 class="text-2xl font-bold text-white">Supported Games</h2>
-                                <p class="text-sm text-neutral-400 mt-1">Preview of top experiences compatible with SENZY HUB.</p>
+                                <h2 class="text-2xl font-bold text-white">Supported Games Preview</h2>
+                                <p class="text-sm text-neutral-400 mt-1">Top experiences compatible with SENZY HUB.</p>
                             </div>
                             <button onclick="router.navigate('games')" class="hidden sm:flex items-center space-x-1 text-sm font-medium text-pink-400 hover:text-pink-300 transition-colors">
                                 <span>View All Games</span>
