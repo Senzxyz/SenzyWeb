@@ -335,6 +335,7 @@
                     if (game) {
                         try {
                             const newViews = (game.views || 0) + 1;
+                            // อัปเดตเฉพาะวิว โดยไม่ไปยุ่งกับสถานะหรือฟิลด์อื่น
                             await supabaseClient.from('games').update({ views: newViews }).eq('id', game.id);
                             game.views = newViews;
                         } catch (err) {
@@ -714,18 +715,19 @@
             const placeId = document.getElementById('edit-placeid').value.trim();
             const name = document.getElementById('edit-name').value.trim();
             const thumbnail = document.getElementById('edit-thumb').value.trim();
-            const statusVal = document.getElementById('edit-status').value; // ดึงค่าจาก Select ชัดเจน
+            const statusVal = document.getElementById('edit-status').value;
             const featuresInput = document.getElementById('edit-features').value.trim();
             const statusEl = document.getElementById('edit-status-text');
             const btn = document.getElementById('update-game-btn');
 
-            statusEl.textContent = "⏳ Updating game status to [" + statusVal + "]...";
+            statusEl.textContent = "⏳ Updating game...";
             statusEl.className = "text-xs text-center text-yellow-400 mt-2";
             btn.disabled = true;
 
             try {
                 const featuresArray = featuresInput ? featuresInput.split(',').map(s => s.trim()) : ["Full Auto"];
                 
+                // ส่งเฉพาะฟิลด์ข้อมูลเกมหลัก โดยปล่อยฟิลด์ views ไว้ให้ปลอดภัย ไม่โดนรีเซ็ต
                 const updatePayload = {
                     place_id: placeId,
                     name: name,
@@ -739,7 +741,7 @@
 
                 if (error) throw error;
 
-                statusEl.textContent = "✅ Updated to " + statusVal + " successfully!";
+                statusEl.textContent = "✅ Updated successfully!";
                 statusEl.className = "text-xs text-center text-emerald-400 mt-2";
                 
                 await initGames(false);
