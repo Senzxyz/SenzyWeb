@@ -210,7 +210,7 @@
                     updateStatsUI();
                 }
             } catch (err) {
-                console.error("Error incrementing copies:", err);
+                console.error("Error copying script:", err);
             }
         }
 
@@ -304,7 +304,7 @@
                     const game = loadedGames.find(g => g.slug === param);
                     if (game) {
                         try {
-                            const newViews = game.views + 1;
+                            const newViews = (game.views || 0) + 1;
                             await supabaseClient.from('games').update({ views: newViews }).eq('id', game.id);
                             game.views = newViews;
                         } catch (err) {
@@ -341,7 +341,7 @@
             const game = loadedGames.find(g => g.id === gameId);
             if (game) {
                 try {
-                    const newViews = game.views + 1;
+                    const newViews = (game.views || 0) + 1;
                     await supabaseClient.from('games').update({ views: newViews }).eq('id', game.id);
                     game.views = newViews;
                 } catch(e) {}
@@ -458,7 +458,7 @@
                     </div>
                     <div class="p-8 rounded-2xl bg-[#101014] border border-pink-500/30 shadow-2xl shadow-pink-500/10 flex flex-col items-center space-y-6">
                         <div class="relative">
-                            <img src="https://cdn.discordapp.com/avatars/1005357318281641994/e7987e9cf4995f72cf7ee793c5d79671.png" onerror="this.src='https://raw.githubusercontent.com/senzxyz2xxx/SenzyHub/refs/heads/main/senz2.png'" class="w-28 h-28 rounded-full border-2 border-pink-500 object-cover shadow-lg shadow-pink-500/30" />
+                            <img src="https://raw.githubusercontent.com/senzxyz2xxx/SenzyHub/refs/heads/main/senz2.png" class="w-28 h-28 rounded-full border-2 border-pink-500 object-cover shadow-lg shadow-pink-500/30" />
                             <div class="absolute bottom-1 right-1 w-6 h-6 rounded-full bg-emerald-500 border-2 border-[#101014]"></div>
                         </div>
                         <div class="space-y-2">
