@@ -121,12 +121,6 @@
             tagline: "One loader for every supported game. Free, no key, always updated.",
             loaderUrl: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/senzxyz2xxx/SenzyHub/refs/heads/main/Loader.lua"))()',
             discordUrl: "https://discord.gg/rhPgnAJE4B",
-            owner: {
-                name: "SenzX",
-                role: "Lead Developer & Scripter",
-                avatar: "https://raw.githubusercontent.com/senzxyz2xxx/SenzyHub/refs/heads/main/senz2.png",
-                profileUrl: "https://discord.com/channels/@me/1005357318281641994"
-            }
         };
 
         let loadedGames = [];
@@ -456,7 +450,6 @@
         }
 
         function renderContact() {
-            const owner = siteConfig.owner;
             return `
                 <div class="max-w-2xl mx-auto px-4 py-20 space-y-8 animate-fade-in text-center">
                     <div class="space-y-3">
@@ -465,22 +458,22 @@
                     </div>
                     <div class="p-8 rounded-2xl bg-[#101014] border border-pink-500/30 shadow-2xl shadow-pink-500/10 flex flex-col items-center space-y-6">
                         <div class="relative">
-                            <img src="${owner.avatar}" class="w-28 h-28 rounded-full border-2 border-pink-500 object-cover shadow-lg shadow-pink-500/30" />
+                            <img src="https://cdn.discordapp.com/avatars/1005357318281641994/e7987e9cf4995f72cf7ee793c5d79671.png" onerror="this.src='https://raw.githubusercontent.com/senzxyz2xxx/SenzyHub/refs/heads/main/senz2.png'" class="w-28 h-28 rounded-full border-2 border-pink-500 object-cover shadow-lg shadow-pink-500/30" />
                             <div class="absolute bottom-1 right-1 w-6 h-6 rounded-full bg-emerald-500 border-2 border-[#101014]"></div>
                         </div>
                         <div class="space-y-2">
-                            <h3 class="text-xl font-bold text-white">${owner.name}</h3>
-                            <p class="text-xs text-pink-400 font-mono font-semibold">${owner.role}</p>
+                            <h3 class="text-xl font-bold text-white">sxen_x</h3>
+                            <p class="text-xs text-pink-400 font-mono font-semibold">Lead Developer & Scripter</p>
                             <p class="text-xs text-neutral-400 max-w-md mx-auto leading-relaxed pt-2">
                                 Open for custom script commissions, bug fixes, UI development, and project collaborations. Feel free to add me on Discord to discuss your project!
                             </p>
                         </div>
                         <div class="w-full pt-4 border-t border-white/[0.06] flex flex-col sm:flex-row justify-center items-center gap-4">
-                            <a href="${owner.profileUrl}" target="_blank" rel="noopener noreferrer" class="w-full sm:w-auto px-6 py-3 rounded-lg bg-[#5865F2] hover:bg-[#4752C4] text-white font-semibold text-sm transition-all shadow-lg shadow-[#5865F2]/30 flex items-center justify-center space-x-2">
+                            <a href="https://discord.com/channels/@me/1005357318281641994" target="_blank" rel="noopener noreferrer" class="w-full sm:w-auto px-6 py-3 rounded-lg bg-[#5865F2] hover:bg-[#4752C4] text-white font-semibold text-sm transition-all shadow-lg shadow-[#5865F2]/30 flex items-center justify-center space-x-2">
                                 <i data-lucide="user-plus" class="w-4 h-4"></i>
                                 <span>Add Friend / DM on Discord</span>
                             </a>
-                            <a href="${siteConfig.discordUrl}" target="_blank" rel="noopener noreferrer" class="w-full sm:w-auto px-6 py-3 rounded-lg bg-pink-500 hover:bg-pink-600 text-white font-semibold text-sm transition-all shadow-lg shadow-pink-500/25 flex items-center justify-center space-x-2">
+                            <a href="https://discord.gg/rhPgnAJE4B" target="_blank" rel="noopener noreferrer" class="w-full sm:w-auto px-6 py-3 rounded-lg bg-pink-500 hover:bg-pink-600 text-white font-semibold text-sm transition-all shadow-lg shadow-pink-500/25 flex items-center justify-center space-x-2">
                                 <i data-lucide="message-square" class="w-4 h-4"></i>
                                 <span>Join Community Server</span>
                             </a>
@@ -748,15 +741,15 @@
                 <div onclick="router.navigate('detail', '${game.slug}')" class="group flex flex-col rounded-xl bg-[#101014] border border-white/[0.08] hover:border-pink-500/50 transition-all duration-300 overflow-hidden hover:-translate-y-1 cursor-pointer">
                     <div class="relative aspect-video w-full overflow-hidden bg-neutral-900">
                         <img src="${game.thumbnail}" alt="${game.name}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                        <div class="absolute top-3 right-3 z-10">
-                            ${getStatusBadge(game.status)}
-                        </div>
                     </div>
                     <div class="p-5 flex flex-col flex-1 justify-between">
                         <div>
                             <div class="flex items-center justify-between">
                                 <h3 class="font-semibold text-white text-base group-hover:text-pink-400 transition-colors line-clamp-1">${game.name}</h3>
-                                <span class="text-[11px] text-neutral-400 bg-white/[0.05] px-2 py-0.5 rounded-full">${game.views} views</span>
+                                <div class="flex items-center space-x-2">
+                                    ${getStatusBadge(game.status)}
+                                    <span class="text-[11px] text-neutral-400 bg-white/[0.05] px-2 py-0.5 rounded-full">${game.views} views</span>
+                                </div>
                             </div>
                             <p class="text-xs text-neutral-400 mt-1.5 line-clamp-2">${game.description}</p>
                         </div>
