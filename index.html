@@ -110,10 +110,7 @@
     <!-- JAVASCRIPT APP LOGIC -->
     <script>
         const SUPABASE_URL = 'https://ncebwjwzbsjfrndwnzsc.supabase.co'; 
-        // 🔑 ใส่ Publishable Key ตัวใหม่จากในรูปของมึงตรงนี้
         const SUPABASE_ANON_KEY = 'sb_publishable_CWRQkIWPuGAl901u9C2Z0A_pgduVz'; 
-        
-        // 🛑 ใส่ UUID แอดมินของมึง
         const ADMIN_UUID = 'b1246426-d70-4a5d-b4fc-bb3d5ae7dd6a'; 
         
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
@@ -171,6 +168,7 @@
                 const { data } = await supabaseClient.from('site_stats').select('*').eq('id', 1).single();
                 if (data) {
                     stats = { views: data.views || 0, copies: data.copies || 0 };
+                    updateStatsUI();
                 }
             } catch (err) {
                 console.error("Error fetching stats:", err);
@@ -186,6 +184,7 @@
                         const newViews = (data.views || 0) + 1;
                         await supabaseClient.from('site_stats').update({ views: newViews }).eq('id', 1);
                         stats.views = newViews;
+                        updateStatsUI();
                     }
                 }
             } catch (err) {
@@ -237,27 +236,31 @@
             if (currentUser) {
                 let htmlContent = `
                     <div class="flex items-center space-x-3">
-                        <div class="flex items-center space-x-2 bg-[#101014] border border-white/[0.08] px-3 py-1.5 rounded-lg">
-                            ${currentUser.avatar ? `<img src="${currentUser.avatar}" class="w-5 h-5 rounded-full" />` : ''}
-                            <span class="text-xs font-medium text-white">${currentUser.name}</span>
-                            ${currentUser.isAdmin ? '<span class="text-[10px] bg-pink-500/20 text-pink-400 px-1.5 py-0.5 rounded font-bold">ADMIN</span>' : ''}
+                        <div class="flex items-center space-x-2 bg-[#101014] border border-pink-500/30 px-3 py-1.5 rounded-lg shadow-md">
+                            ${currentUser.avatar ? `<img src="${currentUser.avatar}" class="w-6 h-6 rounded-full border border-pink-500/50" />` : ''}
+                            <span class="text-xs font-semibold text-white">${currentUser.name}</span>
+                            ${currentUser.isAdmin ? '<span class="text-[10px] bg-pink-500/20 text-pink-400 px-1.5 py-0.5 rounded font-bold border border-pink-500/30">ADMIN</span>' : ''}
                         </div>
-                        ${currentUser.isAdmin ? `<button onclick="router.navigate('admin')" class="text-xs px-2.5 py-1.5 rounded bg-pink-500/10 text-pink-400 border border-pink-500/20 hover:bg-pink-500/20 transition-colors">+ Add Game</button>` : ''}
-                        <button onclick="logout()" class="text-xs text-neutral-400 hover:text-red-400 transition-colors">Logout</button>
+                        ${currentUser.isAdmin ? `<button onclick="router.navigate('admin')" class="text-xs px-3 py-1.5 rounded-lg bg-pink-500 text-white font-medium hover:bg-pink-600 transition-colors shadow-lg shadow-pink-500/20">+ Add Game</button>` : ''}
+                        <button onclick="logout()" class="text-xs px-2.5 py-1.5 rounded-lg bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20 transition-colors">Logout</button>
                     </div>
                 `;
                 navContainer.innerHTML = htmlContent;
                 mobileContainer.innerHTML = `
-                    <div class="py-2 space-y-2 border-t border-white/[0.06] mt-2">
-                        <p class="text-xs text-neutral-300">Logged in as: <span class="text-pink-400 font-semibold">${currentUser.name}</span></p>
+                    <div class="py-2 space-y-3 border-t border-white/[0.06] mt-2">
+                        <div class="flex items-center space-x-2">
+                            ${currentUser.avatar ? `<img src="${currentUser.avatar}" class="w-7 h-7 rounded-full border border-pink-500/50" />` : ''}
+                            <p class="text-xs text-neutral-300">Logged in as: <span class="text-pink-400 font-semibold">${currentUser.name}</span></p>
+                        </div>
                         ${currentUser.isAdmin ? `<button onclick="router.navigate('admin'); toggleMobileMenu();" class="block w-full text-left text-pink-400 py-1 font-semibold">+ Add Game (Admin)</button>` : ''}
                         <button onclick="logout()" class="block w-full text-left text-red-400 py-1">Logout</button>
                     </div>
                 `;
             } else {
-                navContainer.innerHTML = `<button onclick="loginWithDiscord()" class="text-xs px-3 py-1.5 rounded-lg bg-[#5865F2] hover:bg-[#4752C4] text-white font-medium transition-colors flex items-center space-x-1.5"><span>Login with Discord</span></button>`;
-                mobileContainer.innerHTML = `<button onclick="loginWithDiscord()" class="block w-full text-left text-[#5865F2] py-1 font-semibold">Login with Discord</button>`;
+                navContainer.innerHTML = `<button onclick="loginWithDiscord()" class="text-xs px-3.5 py-2 rounded-lg bg-[#5865F2] hover:bg-[#4752C4] text-white font-medium transition-colors flex items-center space-x-1.5 shadow-lg shadow-[#5865F2]/20"><i data-lucide="message-square" class="w-3.5 h-3.5"></i><span>Login with Discord</span></button>`;
+                mobileContainer.innerHTML = `<button onclick="loginWithDiscord()" class="block w-full text-center py-2 rounded-lg bg-[#5865F2] text-white font-semibold text-xs">Login with Discord</button>`;
             }
+            lucide.createIcons();
         }
 
         async function initGames() {
@@ -303,11 +306,14 @@
             incrementCopies();
             const btn = document.getElementById('copy-btn-text');
             const toast = document.getElementById('toast-notification');
-            btn.textContent = "Copied";
+            btn.innerHTML = `<i data-lucide="check" class="w-4 h-4 text-emerald-400"></i><span class="text-emerald-400">Copied!</span>`;
             toast.classList.remove('hidden');
+            lucide.createIcons();
+            
             setTimeout(() => {
-                btn.textContent = "Copy";
+                btn.innerHTML = `<i data-lucide="copy" class="w-4 h-4"></i><span>Copy Script</span>`;
                 toast.classList.add('hidden');
+                lucide.createIcons();
             }, 2500);
         }
 
@@ -317,21 +323,21 @@
                 <div class="space-y-24 pb-12">
                     <section class="relative pt-20 pb-12 text-center px-4">
                         <div class="max-w-3xl mx-auto space-y-6">
-                            <div class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-pink-500/10 text-pink-400 border border-pink-500/20">
+                            <div class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-pink-500/10 text-pink-400 border border-pink-500/20 shadow-inner">
                                 <span>${loadedGames.length}+ Supported Games & Counting</span>
                             </div>
                             <h1 class="text-4xl sm:text-6xl font-extrabold tracking-tight text-white">One Loader. Every Supported Game.</h1>
                             <p class="text-base sm:text-lg text-neutral-400 max-w-2xl mx-auto">Use a single loader from <span class="text-pink-400 font-semibold">SENZY HUB</span> to automatically detect and run supported games instantly.</p>
                             
                             <!-- STATS COUNTER -->
-                            <div class="flex justify-center items-center gap-8 pt-4">
-                                <div class="px-5 py-3 rounded-xl bg-[#101014] border border-pink-500/20 shadow-lg">
-                                    <p class="text-xs text-neutral-400 uppercase tracking-wider">Total Views</p>
-                                    <p id="stat-views" class="text-2xl font-bold text-pink-400">${stats.views.toLocaleString()}</p>
+                            <div class="flex justify-center items-center gap-6 pt-4">
+                                <div class="px-6 py-3 rounded-xl bg-[#101014] border border-pink-500/30 shadow-xl shadow-pink-500/5">
+                                    <p class="text-[11px] text-neutral-400 uppercase tracking-wider font-semibold">Total Views</p>
+                                    <p id="stat-views" class="text-3xl font-extrabold text-pink-400 mt-1">${stats.views.toLocaleString()}</p>
                                 </div>
-                                <div class="px-5 py-3 rounded-xl bg-[#101014] border border-pink-500/20 shadow-lg">
-                                    <p class="text-xs text-neutral-400 uppercase tracking-wider">Script Copies</p>
-                                    <p id="stat-copies" class="text-2xl font-bold text-pink-400">${stats.copies.toLocaleString()}</p>
+                                <div class="px-6 py-3 rounded-xl bg-[#101014] border border-pink-500/30 shadow-xl shadow-pink-500/5">
+                                    <p class="text-[11px] text-neutral-400 uppercase tracking-wider font-semibold">Script Copies</p>
+                                    <p id="stat-copies" class="text-3xl font-extrabold text-pink-400 mt-1">${stats.copies.toLocaleString()}</p>
                                 </div>
                             </div>
 
@@ -341,30 +347,38 @@
                             </div>
                         </div>
                     </section>
+
+                    <!-- PROMINENT UNIVERSAL LOADER SECTION -->
                     <section id="loader" class="max-w-4xl mx-auto px-4">
                         <div class="text-center mb-8 space-y-2">
                             <h2 class="text-2xl font-bold text-white">Universal Loader</h2>
-                            <p class="text-sm text-neutral-400">One loader for every supported game in SENZY HUB.</p>
+                            <p class="text-sm text-neutral-400">Copy and execute the script below in your executor.</p>
                         </div>
-                        <div class="w-full max-w-2xl mx-auto rounded-xl bg-[#101014] border border-pink-500/20 overflow-hidden shadow-2xl shadow-pink-500/5">
-                            <div class="flex items-center justify-between px-4 py-3 bg-[#15151a] border-b border-white/[0.06]">
+                        <div class="w-full max-w-3xl mx-auto rounded-2xl bg-[#101014] border-2 border-pink-500/40 overflow-hidden shadow-2xl shadow-pink-500/10">
+                            <div class="flex items-center justify-between px-5 py-3.5 bg-[#15151a] border-b border-pink-500/20">
                                 <div class="flex items-center space-x-2">
-                                    <div class="w-2.5 h-2.5 rounded-full bg-neutral-600"></div>
-                                    <div class="w-2.5 h-2.5 rounded-full bg-neutral-600"></div>
-                                    <div class="w-2.5 h-2.5 rounded-full bg-neutral-600"></div>
-                                    <span class="text-xs text-neutral-500 font-mono ml-2">loader.lua</span>
+                                    <div class="w-3 h-3 rounded-full bg-pink-500/80 animate-pulse"></div>
+                                    <div class="w-3 h-3 rounded-full bg-neutral-600"></div>
+                                    <div class="w-3 h-3 rounded-full bg-neutral-600"></div>
+                                    <span class="text-xs text-pink-300 font-mono font-semibold ml-2">SENZY_LOADER.lua</span>
                                 </div>
                                 <div class="relative">
-                                    <button onclick="copyLoader()" class="flex items-center space-x-1.5 px-3 py-1.5 rounded-md bg-white/[0.06] hover:bg-pink-500/20 text-xs font-medium text-neutral-300 hover:text-pink-400 transition-all border border-white/[0.08]">
-                                        <i data-lucide="copy" class="w-3.5 h-3.5"></i>
-                                        <span id="copy-btn-text">Copy</span>
+                                    <button onclick="copyLoader()" id="copy-btn-text" class="flex items-center space-x-2 px-4 py-2 rounded-lg bg-pink-500 hover:bg-pink-600 text-xs font-bold text-white transition-all shadow-lg shadow-pink-500/30">
+                                        <i data-lucide="copy" class="w-4 h-4"></i>
+                                        <span>Copy Script</span>
                                     </button>
-                                    <div id="toast-notification" class="hidden absolute right-0 -bottom-10 bg-[#121216] border border-pink-500/30 text-white text-[11px] px-3 py-1 rounded shadow-lg whitespace-nowrap animate-fade-in">Loader copied to clipboard.</div>
+                                    <div id="toast-notification" class="hidden absolute right-0 -bottom-12 bg-[#1a1a22] border border-pink-500/40 text-emerald-300 text-xs px-4 py-1.5 rounded-lg shadow-xl whitespace-nowrap animate-fade-in font-medium flex items-center space-x-1.5">
+                                        <i data-lucide="check-circle" class="w-3.5 h-3.5"></i>
+                                        <span>Script copied successfully!</span>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="p-4 font-mono text-xs sm:text-sm text-pink-300 overflow-x-auto"><code>${siteConfig.loaderUrl}</code></div>
+                            <div class="p-5 font-mono text-xs sm:text-sm text-pink-300 bg-[#0c0c0f] overflow-x-auto select-all">
+                                <code>${siteConfig.loaderUrl}</code>
+                            </div>
                         </div>
                     </section>
+
                     <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                         <div class="flex justify-between items-end mb-8">
                             <div>
