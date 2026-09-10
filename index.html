@@ -110,9 +110,10 @@
     <!-- JAVASCRIPT APP LOGIC -->
     <script>
         const SUPABASE_URL = 'https://ncebwjwzbsjfrndwnzsc.supabase.co'; 
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5jZWJ3and6YnNqZnJuZHduenNjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEyNDk3MzMsImV4cCI6MjA1Njg4NTczM30.YOUR_ACTUAL_ANON_KEY'; 
+        // 🔑 ใส่ Publishable Key ตัวใหม่จากในรูปของมึงตรงนี้
+        const SUPABASE_ANON_KEY = 'sb_publishable_CWRQkIWPuGAl901u9C2Z0A_pgduVz'; 
         
-        // 🛑 เอา UUID ของมึงจากหน้า Supabase Users ในรูปมาใส่ตรงนี้ (เช่น 'b1246426-d70-4a5d-b4fc-bb3d5ae7dd6a')
+        // 🛑 ใส่ UUID แอดมินของมึง
         const ADMIN_UUID = 'b1246426-d70-4a5d-b4fc-bb3d5ae7dd6a'; 
         
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
@@ -144,7 +145,7 @@
             try {
                 const { data: { session } } = await supabaseClient.auth.getSession();
                 if (session && session.user) {
-                    const userId = session.user.id; // ใช้ Supabase UUID โดยตรง ชัวร์ที่สุด
+                    const userId = session.user.id;
                     const userName = session.user.user_metadata?.full_name || session.user.user_metadata?.name || session.user.email || "User";
                     const avatarUrl = session.user.user_metadata?.avatar_url || "";
 
