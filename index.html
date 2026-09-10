@@ -111,8 +111,6 @@
     <script>
         const SUPABASE_URL = 'https://ncebwjwzbsjfrndwnzsc.supabase.co'; 
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5jZWJ3and6YnNqZnJuZHduenNjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEyNDk3MzMsImV4cCI6MjA1Njg4NTczM30.YOUR_ACTUAL_ANON_KEY'; 
-        
-        // 🛑 ใส่ Discord User ID ของมึงตรงนี้ เพื่อเช็คสิทธิ์ Admin
         const ADMIN_DISCORD_ID = 'YOUR_DISCORD_USER_ID'; 
         
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -135,28 +133,37 @@
         }
 
         async function initApp() {
-            // จัดการ Token ที่ส่งกลับมาจาก OAuth Callback ใน URL Hash
-            const hash = window.location.hash;
-            if (hash && hash.includes('access_token')) {
-                const { data, error } = await supabaseClient.auth.getSessionFromUrl({ url: window.location.href });
-                if (data && data.session) {
-                    await supabaseClient.auth.setSession(data.session);
-                    window.location.hash = ''; // เคลียร์ URL ให้สะอาด
+            try {
+                // ดึงค่า Token จาก Hash URL แบบปลอดภัย
+                const hash = window.location.hash;
+                if (hash && hash.includes('access_token')) {
+                    const params = new URLSearchParams(hash.substring(1));
+                    const accessToken = params.get('access_token');
+                    const refreshToken = params.get('refresh_token');
+                    if (accessToken) {
+                        await supabaseClient.auth.setSession({
+                            access_token: accessToken,
+                            refresh_token: refreshToken
+                        });
+                        window.history.replaceState(null, null, window.location.pathname);
+                    }
                 }
-            }
 
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            if (session && session.user) {
-                const providerId = session.user.user_metadata?.provider_id || session.user.identities?.[0]?.id || session.user.id;
-                const userName = session.user.user_metadata?.full_name || session.user.user_metadata?.name || session.user.email || "User";
-                const avatarUrl = session.user.user_metadata?.avatar_url || "";
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                if (session && session.user) {
+                    const providerId = session.user.user_metadata?.provider_id || session.user.identities?.[0]?.id || session.user.id;
+                    const userName = session.user.user_metadata?.full_name || session.user.user_metadata?.name || session.user.email || "User";
+                    const avatarUrl = session.user.user_metadata?.avatar_url || "";
 
-                currentUser = {
-                    id: String(providerId),
-                    name: userName,
-                    avatar: avatarUrl,
-                    isAdmin: String(providerId) === String(ADMIN_DISCORD_ID)
-                };
+                    currentUser = {
+                        id: String(providerId),
+                        name: userName,
+                        avatar: avatarUrl,
+                        isAdmin: String(providerId) === String(ADMIN_DISCORD_ID)
+                    };
+                }
+            } catch (err) {
+                console.error("Auth init error:", err);
             }
 
             await fetchStats();
