@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SENZY HUB — One Loader. Every Supported Game.</title>
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -24,9 +23,7 @@
             }
         }
     </script>
-    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- Supabase JS SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         @keyframes fadeIn {
@@ -44,14 +41,12 @@
 </head>
 <body class="bg-[#070709] text-white min-h-screen flex flex-col antialiased">
 
-    <!-- NAVBAR -->
     <header class="sticky top-0 z-50 bg-[#0a0a0c]/80 backdrop-blur-md border-b border-pink-500/10">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
             <a href="#" onclick="router.navigate('home')" class="flex items-center space-x-2 cursor-pointer">
                 <span class="font-bold tracking-wider text-xl text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-pink-600">SENZY HUB</span>
             </a>
 
-            <!-- Desktop Navigation -->
             <nav class="hidden md:flex items-center space-x-8 text-sm font-medium text-neutral-400">
                 <button onclick="router.navigate('home')" class="hover:text-pink-400 transition-colors">Home</button>
                 <button onclick="router.navigate('games')" class="hover:text-pink-400 transition-colors">Games</button>
@@ -63,13 +58,11 @@
                 </a>
             </nav>
 
-            <!-- Mobile Menu Button -->
             <button onclick="toggleMobileMenu()" class="md:hidden p-2 text-neutral-400 hover:text-pink-400 focus:outline-none">
                 <i data-lucide="menu" id="menu-icon" class="w-6 h-6"></i>
             </button>
         </div>
 
-        <!-- Mobile Dropdown -->
         <div id="mobile-menu" class="hidden md:hidden bg-[#0a0a0c] border-b border-pink-500/10 px-4 pt-2 pb-4 space-y-3">
             <button onclick="router.navigate('home'); toggleMobileMenu();" class="block w-full text-left text-neutral-300 hover:text-pink-400 py-1">Home</button>
             <button onclick="router.navigate('games'); toggleMobileMenu();" class="block w-full text-left text-neutral-300 hover:text-pink-400 py-1">Games</button>
@@ -82,12 +75,8 @@
         </div>
     </header>
 
-    <!-- MAIN CONTENT CONTAINER -->
-    <main id="app-container" class="flex-1">
-        <!-- Rendered dynamically -->
-    </main>
+    <main id="app-container" class="flex-1"></main>
 
-    <!-- FOOTER -->
     <footer class="border-t border-pink-500/10 bg-[#070709] text-neutral-400 py-12 mt-20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center space-y-6 md:space-y-0">
             <div>
@@ -107,20 +96,10 @@
         </div>
     </footer>
 
-    <!-- JAVASCRIPT APP LOGIC -->
     <script>
-        const SUPABASE_URL = 'https://ncebwjwzbsjfrndwnzsc.supabase.co'; 
-        const SUPABASE_ANON_KEY = 'sb_publishable_CWRQkIWPuGAl901u9C2Z0A_pgduVz'; 
-        const ADMIN_UUID = 'b1246426-d70-4a5d-b4fc-bb3d5ae7dd6a'; 
+        let supabaseClient = null;
+        let ADMIN_UUID = '';
         
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-            auth: {
-                persistSession: true,
-                autoRefreshToken: true,
-                detectSessionInUrl: true
-            }
-        });
-
         const siteConfig = {
             name: "SENZY HUB",
             tagline: "One Loader. Every Supported Game.",
@@ -140,6 +119,23 @@
 
         async function initApp() {
             try {
+                // ดึงค่า Config จาก API ที่ปลอดภัยหลังบ้าน (ดึงจาก Env โดยตรง)
+                const res = await fetch('/api/config');
+                const config = await res.json();
+                
+                if (!config.supabaseUrl || !config.supabaseAnonKey) {
+                    throw new Error("Missing Supabase configuration from environment.");
+                }
+
+                ADMIN_UUID = config.adminUuid;
+                supabaseClient = supabase.createClient(config.supabaseUrl, config.supabaseAnonKey, {
+                    auth: {
+                        persistSession: true,
+                        autoRefreshToken: true,
+                        detectSessionInUrl: true
+                    }
+                });
+
                 const { data: { session } } = await supabaseClient.auth.getSession();
                 if (session && session.user) {
                     const userId = session.user.id;
@@ -153,14 +149,15 @@
                         isAdmin: userId === ADMIN_UUID
                     };
                 }
-            } catch (err) {
-                console.error("Auth init error:", err);
-            }
 
-            await fetchStats();
-            await incrementViews();
-            await initGames();
-            updateNavbarAuth();
+                await fetchStats();
+                await incrementViews();
+                await initGames();
+                updateNavbarAuth();
+
+            } catch (err) {
+                console.error("Initialization error:", err);
+            }
         }
 
         async function fetchStats() {
@@ -317,7 +314,6 @@
             }, 2500);
         }
 
-        // --- VIEWS ---
         function renderHome() {
             return `
                 <div class="space-y-24 pb-12">
@@ -329,7 +325,6 @@
                             <h1 class="text-4xl sm:text-6xl font-extrabold tracking-tight text-white">One Loader. Every Supported Game.</h1>
                             <p class="text-base sm:text-lg text-neutral-400 max-w-2xl mx-auto">Use a single loader from <span class="text-pink-400 font-semibold">SENZY HUB</span> to automatically detect and run supported games instantly.</p>
                             
-                            <!-- STATS COUNTER -->
                             <div class="flex justify-center items-center gap-6 pt-4">
                                 <div class="px-6 py-3 rounded-xl bg-[#101014] border border-pink-500/30 shadow-xl shadow-pink-500/5">
                                     <p class="text-[11px] text-neutral-400 uppercase tracking-wider font-semibold">Total Views</p>
@@ -348,7 +343,6 @@
                         </div>
                     </section>
 
-                    <!-- PROMINENT UNIVERSAL LOADER SECTION -->
                     <section id="loader" class="max-w-4xl mx-auto px-4">
                         <div class="text-center mb-8 space-y-2">
                             <h2 class="text-2xl font-bold text-white">Universal Loader</h2>
