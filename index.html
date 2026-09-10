@@ -119,7 +119,6 @@
 
         async function initApp() {
             try {
-                // ดึงค่า Config จาก API ที่ปลอดภัยหลังบ้าน (ดึงจาก Env โดยตรง)
                 const res = await fetch('/api/config');
                 const config = await res.json();
                 
@@ -477,7 +476,7 @@
                 <div class="max-w-xl mx-auto px-4 py-16 space-y-8 animate-fade-in">
                     <div class="flex justify-between items-center">
                         <div>
-                            <h1 class="text-2xl font-bold text-white">Add Game via Link</h1>
+                            <h1 class="text-2xl font-bold text-white">Add Game Manually</h1>
                             <p class="text-sm text-neutral-400">Welcome back, Admin ${currentUser.name}</p>
                         </div>
                         <button onclick="logout()" class="text-xs text-red-400 border border-red-500/20 px-3 py-1.5 rounded-lg hover:bg-red-500/10">Logout</button>
@@ -485,58 +484,57 @@
 
                     <div class="p-6 rounded-2xl bg-[#101014] border border-pink-500/20 space-y-4 shadow-xl">
                         <div>
-                            <label class="block text-xs font-medium text-neutral-300 mb-1">Roblox Game URL</label>
-                            <input type="text" id="roblox-url-input" placeholder="https://www.roblox.com/games/106484206883664/..." class="w-full px-4 py-2.5 rounded-lg bg-neutral-900 border border-white/[0.1] text-sm text-white focus:outline-none focus:border-pink-500" />
+                            <label class="block text-xs font-medium text-neutral-300 mb-1">Place ID</label>
+                            <input type="text" id="game-placeid" placeholder="113290951185459" class="w-full px-4 py-2.5 rounded-lg bg-neutral-900 border border-white/[0.1] text-sm text-white focus:outline-none focus:border-pink-500" />
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-neutral-300 mb-1">Game Name</label>
+                            <input type="text" id="game-name" placeholder="Anime Dice" class="w-full px-4 py-2.5 rounded-lg bg-neutral-900 border border-white/[0.1] text-sm text-white focus:outline-none focus:border-pink-500" />
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-neutral-300 mb-1">Thumbnail Image URL</label>
+                            <input type="text" id="game-thumb" placeholder="https://tr.rbxcdn.com/..." class="w-full px-4 py-2.5 rounded-lg bg-neutral-900 border border-white/[0.1] text-sm text-white focus:outline-none focus:border-pink-500" />
                         </div>
                         <div>
                             <label class="block text-xs font-medium text-neutral-300 mb-1">Features (Comma separated)</label>
-                            <input type="text" id="roblox-features-input" value="Full Auto, Auto Farm" class="w-full px-4 py-2.5 rounded-lg bg-neutral-900 border border-white/[0.1] text-sm text-white focus:outline-none focus:border-pink-500" />
+                            <input type="text" id="game-features" value="Full Auto, Auto Farm" class="w-full px-4 py-2.5 rounded-lg bg-neutral-900 border border-white/[0.1] text-sm text-white focus:outline-none focus:border-pink-500" />
                         </div>
-                        <button onclick="handleAutoAddGame()" id="add-game-btn" class="w-full py-3 rounded-lg bg-pink-500 hover:bg-pink-600 text-white font-semibold text-sm transition-colors shadow-lg shadow-pink-500/25">Fetch & Save Game</button>
+                        <button onclick="handleAddGameManual()" id="add-game-btn" class="w-full py-3 rounded-lg bg-pink-500 hover:bg-pink-600 text-white font-semibold text-sm transition-colors shadow-lg shadow-pink-500/25">Save Game to Database</button>
                         <p id="fetch-status" class="text-xs text-center text-neutral-400 mt-2"></p>
                     </div>
                 </div>
             `;
         }
 
-        async function handleAutoAddGame() {
-            const urlInput = document.getElementById('roblox-url-input').value.trim();
-            const featuresInput = document.getElementById('roblox-features-input').value.trim();
+        async function handleAddGameManual() {
+            const placeId = document.getElementById('game-placeid').value.trim();
+            const name = document.getElementById('game-name').value.trim();
+            const thumbnail = document.getElementById('game-thumb').value.trim();
+            const featuresInput = document.getElementById('game-features').value.trim();
             const statusEl = document.getElementById('fetch-status');
             const btn = document.getElementById('add-game-btn');
 
-            const match = urlInput.match(/\/games\/(\d+)/);
-            if (!match) {
-                statusEl.textContent = "❌ Invalid Roblox URL format.";
+            if (!placeId || !name) {
+                statusEl.textContent = "❌ Please fill in Place ID and Game Name.";
                 statusEl.className = "text-xs text-center text-red-400 mt-2";
                 return;
             }
 
-            const placeId = match[1];
-            statusEl.textContent = "⏳ Fetching details from Roblox API...";
+            statusEl.textContent = "⏳ Saving game data...";
             statusEl.className = "text-xs text-center text-yellow-400 mt-2";
             btn.disabled = true;
 
             try {
-                const universeRes = await fetch(`https://apis.roblox.com/universes/v1/places/${placeId}/universe`);
-                const universeData = await universeRes.json();
-                const universeId = universeData.universeId;
-
-                const detailsRes = await fetch(`https://games.roblox.com/v1/games?universeIds=${universeId}`);
-                const detailsData = await detailsRes.json();
-                const gameInfo = detailsData.data[0];
-
-                const gameName = gameInfo ? gameInfo.name : `Game ${placeId}`;
-                const gameDesc = gameInfo && gameInfo.description ? gameInfo.description.substring(0, 100) + '...' : 'Full Auto';
-
-                const thumbRes = await fetch(`https://thumbnails.roblox.com/v1/games/icons?universeIds=${universeId}&size=768x432&format=Png&isCircular=false`);
-                const thumbData = await thumbRes.json();
-                const thumbnail = thumbData.data[0] ? thumbData.data[0].imageUrl : "https://tr.rbxcdn.com/180DAY-74e3238344382f02297e172c0366b7a5/768/432/Image/Webp/noFilter";
-
                 const featuresArray = featuresInput ? featuresInput.split(',').map(s => s.trim()) : ["Full Auto"];
 
                 const { error } = await supabaseClient.from('games').insert([
-                    { place_id: placeId, name: gameName, description: gameDesc, thumbnail: thumbnail, features: featuresArray }
+                    { 
+                        place_id: placeId, 
+                        name: name, 
+                        description: "Full Auto supported game.", 
+                        thumbnail: thumbnail || "https://tr.rbxcdn.com/180DAY-74e3238344382f02297e172c0366b7a5/768/432/Image/Webp/noFilter", 
+                        features: featuresArray 
+                    }
                 ]);
 
                 if (error) throw error;
@@ -548,7 +546,7 @@
 
             } catch (err) {
                 console.error(err);
-                statusEl.textContent = "❌ Failed to fetch and save game data.";
+                statusEl.textContent = "❌ Failed to save game data.";
                 statusEl.className = "text-xs text-center text-red-400 mt-2";
                 btn.disabled = false;
             }
