@@ -5,17 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SENZY HUB — One Loader. Every Supported Game.</title>
     
-    <!-- Link Preview Meta Tags (Discord Embed Style) -->
+    <!-- Link Preview Meta Tags -->
     <meta property="og:title" content="SENZY HUB">
     <meta property="og:description" content="One loader for every supported game. Free, no key, always updated.">
     <meta property="og:image" content="https://raw.githubusercontent.com/senzxyz2xxx/SenzyHub/refs/heads/main/senz2.png">
     <meta property="og:url" content="https://senzyhub.vercel.app">
     <meta name="theme-color" content="#ec4899">
-
-    <!-- Favicon -->
     <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/senzxyz2xxx/SenzyHub/refs/heads/main/senz2.png">
 
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -35,9 +32,7 @@
             }
         }
     </script>
-    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- Supabase JS SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         @keyframes fadeIn {
@@ -55,7 +50,6 @@
 </head>
 <body class="bg-[#070709] text-white min-h-screen flex flex-col antialiased">
 
-    <!-- NAVBAR -->
     <header class="sticky top-0 z-50 bg-[#0a0a0c]/80 backdrop-blur-md border-b border-pink-500/10">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
             <a href="#" onclick="router.navigate('home')" class="flex items-center space-x-2 cursor-pointer">
@@ -63,7 +57,6 @@
                 <span class="font-bold tracking-wider text-xl text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-pink-600">SENZY HUB</span>
             </a>
 
-            <!-- Desktop Navigation -->
             <nav class="hidden md:flex items-center space-x-8 text-sm font-medium text-neutral-400">
                 <button onclick="router.navigate('home')" class="hover:text-pink-400 transition-colors">Home</button>
                 <button onclick="router.navigate('games')" class="hover:text-pink-400 transition-colors">Games</button>
@@ -75,13 +68,11 @@
                 </a>
             </nav>
 
-            <!-- Mobile Menu Button -->
             <button onclick="toggleMobileMenu()" class="md:hidden p-2 text-neutral-400 hover:text-pink-400 focus:outline-none">
                 <i data-lucide="menu" id="menu-icon" class="w-6 h-6"></i>
             </button>
         </div>
 
-        <!-- Mobile Dropdown -->
         <div id="mobile-menu" class="hidden md:hidden bg-[#0a0a0c] border-b border-pink-500/10 px-4 pt-2 pb-4 space-y-3">
             <button onclick="router.navigate('home'); toggleMobileMenu();" class="block w-full text-left text-neutral-300 hover:text-pink-400 py-1">Home</button>
             <button onclick="router.navigate('games'); toggleMobileMenu();" class="block w-full text-left text-neutral-300 hover:text-pink-400 py-1">Games</button>
@@ -94,10 +85,8 @@
         </div>
     </header>
 
-    <!-- MAIN CONTENT CONTAINER -->
     <main id="app-container" class="flex-1"></main>
 
-    <!-- FOOTER -->
     <footer class="border-t border-pink-500/10 bg-[#070709] text-neutral-400 py-12 mt-20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center space-y-6 md:space-y-0">
             <div class="flex items-center space-x-3">
@@ -120,7 +109,6 @@
         </div>
     </footer>
 
-    <!-- JAVASCRIPT APP LOGIC -->
     <script>
         let supabaseClient = null;
         let ADMIN_UUID = '';
@@ -153,11 +141,7 @@
 
                 ADMIN_UUID = config.adminUuid;
                 supabaseClient = supabase.createClient(config.supabaseUrl, config.supabaseAnonKey, {
-                    auth: {
-                        persistSession: true,
-                        autoRefreshToken: true,
-                        detectSessionInUrl: true
-                    }
+                    auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
                 });
 
                 const { data: { session } } = await supabaseClient.auth.getSession();
@@ -166,19 +150,13 @@
                     const userName = session.user.user_metadata?.full_name || session.user.user_metadata?.name || session.user.email || "User";
                     const avatarUrl = session.user.user_metadata?.avatar_url || "";
 
-                    currentUser = {
-                        id: userId,
-                        name: userName,
-                        avatar: avatarUrl,
-                        isAdmin: userId === ADMIN_UUID
-                    };
+                    currentUser = { id: userId, name: userName, avatar: avatarUrl, isAdmin: userId === ADMIN_UUID };
                 }
 
                 await fetchStats();
                 await incrementViews();
                 await initGames();
                 updateNavbarAuth();
-
             } catch (err) {
                 console.error("Initialization error:", err);
             }
@@ -235,12 +213,7 @@
         }
 
         async function loginWithDiscord() {
-            const { error } = await supabaseClient.auth.signInWithOAuth({
-                provider: 'discord',
-                options: {
-                    redirectTo: window.location.origin
-                }
-            });
+            const { error } = await supabaseClient.auth.signInWithOAuth({ provider: 'discord', options: { redirectTo: window.location.origin } });
             if (error) alert("Login Error: " + error.message);
         }
 
@@ -255,7 +228,7 @@
             const mobileContainer = document.getElementById('mobile-auth-container');
 
             if (currentUser) {
-                let htmlContent = `
+                navContainer.innerHTML = `
                     <div class="flex items-center space-x-3">
                         <div class="flex items-center space-x-2 bg-[#101014] border border-pink-500/30 px-3 py-1.5 rounded-lg shadow-md">
                             ${currentUser.avatar ? `<img src="${currentUser.avatar}" class="w-6 h-6 rounded-full border border-pink-500/50" />` : ''}
@@ -266,7 +239,6 @@
                         <button onclick="logout()" class="text-xs px-2.5 py-1.5 rounded-lg bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20 transition-colors">Logout</button>
                     </div>
                 `;
-                navContainer.innerHTML = htmlContent;
                 mobileContainer.innerHTML = `
                     <div class="py-2 space-y-3 border-t border-white/[0.06] mt-2">
                         <div class="flex items-center space-x-2">
@@ -290,12 +262,16 @@
                 if (error) throw error;
                 if (data) {
                     loadedGames = data.map((item) => ({
+                        id: item.id,
                         placeId: item.place_id,
                         slug: slugify(item.name),
                         name: item.name,
-                        description: item.description || "Full Auto",
+                        description: item.description || "Full Auto supported game.",
                         thumbnail: item.thumbnail || "https://tr.rbxcdn.com/180DAY-74e3238344382f02297e172c0366b7a5/768/432/Image/Webp/noFilter",
-                        features: item.features || ["Full Auto"]
+                        features: item.features || ["Full Auto"],
+                        status: item.status || "Working",
+                        views: item.views || 0,
+                        updatedAt: item.updated_at ? new Date(item.updated_at).toLocaleDateString() : "Recent"
                     }));
                 }
             } catch (err) {
@@ -306,7 +282,7 @@
         }
 
         const router = {
-            navigate: (route, param = null) => {
+            navigate: async (route, param = null) => {
                 if (route === 'admin' && (!currentUser || !currentUser.isAdmin)) {
                     alert("Access Denied! Admin only.");
                     return;
@@ -314,6 +290,20 @@
                 currentRoute = route;
                 routeParam = param;
                 window.scrollTo({ top: 0, behavior: 'smooth' });
+
+                // ถ้ากดเข้าหน้าดูรายละเอียดเกม ให้บวกยอดวิวเกมนั้น 1 ครั้ง
+                if (route === 'detail' && param) {
+                    const game = loadedGames.find(g => g.slug === param);
+                    if (game) {
+                        try {
+                            const newViews = game.views + 1;
+                            await supabaseClient.from('games').update({ views: newViews }).eq('id', game.id);
+                            game.views = newViews;
+                        } catch (err) {
+                            console.error("Error updating game views:", err);
+                        }
+                    }
+                }
                 render();
             }
         };
@@ -338,10 +328,35 @@
             }, 2500);
         }
 
+        // Quick Copy สำหรับแต่ละเกม (Quick Play)
+        async function quickCopyGame(event, placeId, gameName) {
+            event.stopPropagation(); // กันไม่ให้กดการ์ดแล้วเด้งไปหน้าอื่น
+            const specificScript = `loadstring(game:HttpGet("https://raw.githubusercontent.com/senzxyz2xxx/SenzyHub/refs/heads/main/Loader.lua"))()`;
+            navigator.clipboard.writeText(specificScript);
+            incrementCopies();
+
+            // อัปเดตสถิติตอนคนกด Quick Play
+            const game = loadedGames.find(g => g.placeId === placeId);
+            if (game) {
+                try {
+                    const newViews = game.views + 1;
+                    await supabaseClient.from('games').update({ views: newViews }).eq('id', game.id);
+                    game.views = newViews;
+                } catch(e) {}
+            }
+
+            alert(`✅ Copied loader script for "${gameName}"!`);
+        }
+
+        function getStatusBadge(status) {
+            if (status === 'Working') return `<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1 animate-pulse"></span> Working</span>`;
+            if (status === 'Updating') return `<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30"><span class="w-1.5 h-1.5 rounded-full bg-amber-400 mr-1 animate-pulse"></span> Updating</span>`;
+            return `<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-red-500/20 text-red-400 border border-red-500/30"><span class="w-1.5 h-1.5 rounded-full bg-red-400 mr-1"></span> Discontinued</span>`;
+        }
+
         function renderHome() {
             return `
                 <div class="space-y-20 pb-12">
-                    <!-- HERO & PROMINENT LOADER -->
                     <section class="relative pt-12 pb-8 text-center px-4">
                         <div class="max-w-4xl mx-auto space-y-8">
                             <div class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-pink-500/10 text-pink-400 border border-pink-500/20 shadow-inner">
@@ -352,7 +367,6 @@
                                 <p class="text-base sm:text-lg text-neutral-400 max-w-2xl mx-auto">${siteConfig.tagline}</p>
                             </div>
                             
-                            <!-- STATS COUNTER -->
                             <div class="flex justify-center items-center gap-6">
                                 <div class="px-6 py-2.5 rounded-xl bg-[#101014] border border-pink-500/30 shadow-xl shadow-pink-500/5">
                                     <p class="text-[11px] text-neutral-400 uppercase tracking-wider font-semibold">Total Views</p>
@@ -364,7 +378,6 @@
                                 </div>
                             </div>
 
-                            <!-- PROMINENT UNIVERSAL LOADER BOX -->
                             <div class="w-full max-w-3xl mx-auto rounded-xl bg-[#101014] border border-white/[0.08] border-l-4 border-l-[#5865F2] overflow-hidden shadow-2xl text-left mt-6">
                                 <div class="flex items-center justify-between px-5 py-3.5 bg-[#15151a] border-b border-white/[0.06]">
                                     <div class="flex items-center space-x-2">
@@ -393,7 +406,6 @@
                         </div>
                     </section>
 
-                    <!-- SUPPORTED GAMES PREVIEW -->
                     <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                         <div class="flex justify-between items-end mb-8">
                             <div>
@@ -452,20 +464,27 @@
                                     <img src="${game.thumbnail}" alt="${game.name}" class="w-full h-full object-cover" />
                                 </div>
                                 <div class="space-y-2">
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-pink-500/10 text-pink-400 border border-pink-500/20">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-pink-400 mr-1.5 animate-pulse"></span> Supported
-                                    </span>
+                                    <div class="flex items-center space-x-2">
+                                        ${getStatusBadge(game.status)}
+                                        <span class="text-xs text-neutral-400">• Views: ${game.views}</span>
+                                    </div>
                                     <h1 class="text-2xl sm:text-3xl font-bold text-white">${game.name}</h1>
                                 </div>
                             </div>
-                            <a href="https://www.roblox.com/games/${game.placeId}" target="_blank" rel="noopener noreferrer" class="w-full sm:w-auto inline-flex items-center justify-center space-x-2 px-5 py-2.5 rounded-lg bg-pink-500 text-white font-semibold text-sm hover:bg-pink-600 transition-colors shadow-lg shadow-pink-500/25">
-                                <span>Play Game</span>
-                                <i data-lucide="external-link" class="w-4 h-4"></i>
-                            </a>
+                            <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                                <button onclick="quickCopyGame(event, '${game.placeId}', '${game.name}')" class="px-5 py-2.5 rounded-lg bg-pink-500 hover:bg-pink-600 text-white font-semibold text-sm transition-colors shadow-lg shadow-pink-500/25 flex items-center justify-center space-x-2">
+                                    <i data-lucide="zap" class="w-4 h-4"></i>
+                                    <span>Quick Play</span>
+                                </button>
+                                <a href="https://www.roblox.com/games/${game.placeId}" target="_blank" rel="noopener noreferrer" class="px-5 py-2.5 rounded-lg bg-neutral-800 text-white font-semibold text-sm hover:bg-neutral-700 transition-colors flex items-center justify-center space-x-2 border border-white/[0.1]">
+                                    <span>Roblox</span>
+                                    <i data-lucide="external-link" class="w-4 h-4"></i>
+                                </a>
+                            </div>
                         </div>
-                        <div class="pt-4 border-t border-white/[0.06]">
-                            <h3 class="text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-2">Description</h3>
-                            <p class="text-sm text-neutral-300 leading-relaxed">${game.description}</p>
+                        <div class="pt-4 border-t border-white/[0.06] flex justify-between text-xs text-neutral-400">
+                            <p class="leading-relaxed text-neutral-300"><span class="font-semibold text-neutral-400">Description:</span> ${game.description}</p>
+                            <p class="whitespace-nowrap ml-4">Last Updated: <span class="text-pink-400 font-medium">${game.updatedAt}</span></p>
                         </div>
                     </div>
                     <div class="space-y-4">
@@ -518,6 +537,14 @@
                             <input type="text" id="game-thumb" placeholder="https://tr.rbxcdn.com/..." class="w-full px-4 py-2.5 rounded-lg bg-neutral-900 border border-white/[0.1] text-sm text-white focus:outline-none focus:border-pink-500" />
                         </div>
                         <div>
+                            <label class="block text-xs font-medium text-neutral-300 mb-1">Game Status</label>
+                            <select id="game-status" class="w-full px-4 py-2.5 rounded-lg bg-neutral-900 border border-white/[0.1] text-sm text-white focus:outline-none focus:border-pink-500">
+                                <option value="Working">Working (ใช้งานได้ปกติ)</option>
+                                <option value="Updating">Updating (กำลังอัปเดต)</option>
+                                <option value="Discontinued">Discontinued (หยุดให้บริการ)</option>
+                            </select>
+                        </div>
+                        <div>
                             <label class="block text-xs font-medium text-neutral-300 mb-1">Features (Comma separated)</label>
                             <input type="text" id="game-features" value="Full Auto, Auto Farm" class="w-full px-4 py-2.5 rounded-lg bg-neutral-900 border border-white/[0.1] text-sm text-white focus:outline-none focus:border-pink-500" />
                         </div>
@@ -532,6 +559,7 @@
             const placeId = document.getElementById('game-placeid').value.trim();
             const name = document.getElementById('game-name').value.trim();
             const thumbnail = document.getElementById('game-thumb').value.trim();
+            const statusVal = document.getElementById('game-status').value;
             const featuresInput = document.getElementById('game-features').value.trim();
             const statusEl = document.getElementById('fetch-status');
             const btn = document.getElementById('add-game-btn');
@@ -555,7 +583,10 @@
                         name: name, 
                         description: "Full Auto supported game.", 
                         thumbnail: thumbnail || "https://tr.rbxcdn.com/180DAY-74e3238344382f02297e172c0366b7a5/768/432/Image/Webp/noFilter", 
-                        features: featuresArray 
+                        features: featuresArray,
+                        status: statusVal,
+                        views: 0,
+                        updated_at: new Date().toISOString()
                     }
                 ]);
 
@@ -597,20 +628,24 @@
                 <div onclick="router.navigate('detail', '${game.slug}')" class="group flex flex-col rounded-xl bg-[#101014] border border-white/[0.08] hover:border-pink-500/50 transition-all duration-300 overflow-hidden hover:-translate-y-1 cursor-pointer">
                     <div class="relative aspect-video w-full overflow-hidden bg-neutral-900">
                         <img src="${game.thumbnail}" alt="${game.name}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                        <div class="absolute top-3 right-3">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-pink-500/10 text-pink-400 border border-pink-500/20">
-                                <span class="w-1.5 h-1.5 rounded-full bg-pink-400 mr-1.5 animate-pulse"></span> Supported
-                            </span>
+                        <div class="absolute top-3 right-3 flex items-center space-x-2">
+                            ${getStatusBadge(game.status)}
                         </div>
                     </div>
                     <div class="p-5 flex flex-col flex-1 justify-between">
                         <div>
-                            <h3 class="font-semibold text-white text-base group-hover:text-pink-400 transition-colors line-clamp-1">${game.name}</h3>
+                            <div class="flex items-center justify-between">
+                                <h3 class="font-semibold text-white text-base group-hover:text-pink-400 transition-colors line-clamp-1">${game.name}</h3>
+                                <span class="text-[11px] text-neutral-500">${game.views} views</span>
+                            </div>
                             <p class="text-xs text-neutral-400 mt-1.5 line-clamp-2">${game.description}</p>
                         </div>
-                        <div class="mt-4 pt-3 border-t border-white/[0.06] flex items-center justify-between text-xs text-neutral-400">
-                            <span class="font-medium text-neutral-300">${game.features.length} Features Available</span>
-                            <span class="flex items-center space-x-1 text-pink-400 group-hover:underline"><span>View Details</span><i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i></span>
+                        <div class="mt-4 pt-3 border-t border-white/[0.06] flex items-center justify-between text-xs">
+                            <button onclick="quickCopyGame(event, '${game.placeId}', '${game.name}')" class="px-3 py-1.5 rounded-lg bg-pink-500/10 text-pink-400 border border-pink-500/20 hover:bg-pink-500 hover:text-white transition-all flex items-center space-x-1 font-semibold">
+                                <i data-lucide="zap" class="w-3.5 h-3.5"></i>
+                                <span>Quick Play</span>
+                            </button>
+                            <span class="text-neutral-500">${game.features.length} Features</span>
                         </div>
                     </div>
                 </div>
