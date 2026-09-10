@@ -113,6 +113,11 @@
     </footer>
 
     <script>
+        // สั่งรีเฟรชหน้าเว็บทั้งเว็บทุก 3 วินาทีเป๊ะๆ
+        setInterval(() => {
+            window.location.reload();
+        }, 3000);
+
         let supabaseClient = null;
         let ADMIN_UUID = '';
         
@@ -121,9 +126,9 @@
             tagline: "One loader for every supported game. Free, no key, always updated.",
             loaderUrl: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/senzxyz2xxx/SenzyHub/refs/heads/main/Loader.lua"))()',
             discordUrl: "https://discord.gg/rhPgnAJE4B",
+            ownerId: "1005357318281641994",
             ownerName: "sxen_x",
-            ownerAvatar: "https://cdn.discordapp.com/avatars/1005357318281641994/e7987e9cf4995f72cf7ee793c5d79671.png",
-            ownerProfile: "https://discord.com/channels/@me/1005357318281641994"
+            ownerAvatar: "https://cdn.discordapp.com/avatars/1005357318281641994/e7987e9cf4995f72cf7ee793c5d79671.png"
         };
 
         let loadedGames = [];
@@ -159,18 +164,32 @@
                     currentUser = { id: userId, name: userName, avatar: avatarUrl, isAdmin: userId === ADMIN_UUID };
                 }
 
+                await fetchDiscordProfile();
                 await fetchStats();
                 await incrementViews();
                 await initGames();
                 updateNavbarAuth();
 
-                setInterval(async () => {
-                    await fetchStats(false);
-                    await initGames(false);
-                }, 10000);
-
             } catch (err) {
                 console.error("Initialization error:", err);
+            }
+        }
+
+        async function fetchDiscordProfile() {
+            try {
+                const res = await fetch(`https://api.lanyard.rest/v1/users/${siteConfig.ownerId}`);
+                const data = await res.json();
+                if (data.success && data.data) {
+                    const discordUser = data.data.discord_user;
+                    if (discordUser.username) {
+                        siteConfig.ownerName = discordUser.global_name || discordUser.username;
+                    }
+                    if (discordUser.avatar) {
+                        siteConfig.ownerAvatar = `https://cdn.discordapp.com/avatars/${siteConfig.ownerId}/${discordUser.avatar}.png?size=256`;
+                    }
+                }
+            } catch (err) {
+                console.log("Using fallback avatar/name");
             }
         }
 
@@ -461,7 +480,7 @@
                     </div>
                     <div class="p-8 rounded-2xl bg-[#101014] border border-pink-500/30 shadow-2xl shadow-pink-500/10 flex flex-col items-center space-y-6">
                         <div class="relative">
-                            <img src="${siteConfig.ownerAvatar}" class="w-28 h-28 rounded-full border-2 border-pink-500 object-cover shadow-lg shadow-pink-500/30" />
+                            <img src="${siteConfig.ownerAvatar}" onerror="this.src='https://raw.githubusercontent.com/senzxyz2xxx/SenzyHub/refs/heads/main/senz2.png'" class="w-28 h-28 rounded-full border-2 border-pink-500 object-cover shadow-lg shadow-pink-500/30" />
                             <div class="absolute bottom-1 right-1 w-6 h-6 rounded-full bg-emerald-500 border-2 border-[#101014]"></div>
                         </div>
                         <div class="space-y-2">
@@ -472,7 +491,7 @@
                             </p>
                         </div>
                         <div class="w-full pt-4 border-t border-white/[0.06] flex flex-col sm:flex-row justify-center items-center gap-4">
-                            <a href="${siteConfig.ownerProfile}" target="_blank" rel="noopener noreferrer" class="w-full sm:w-auto px-6 py-3 rounded-lg bg-[#5865F2] hover:bg-[#4752C4] text-white font-semibold text-sm transition-all shadow-lg shadow-[#5865F2]/30 flex items-center justify-center space-x-2">
+                            <a href="https://discord.com/channels/@me/${siteConfig.ownerId}" target="_blank" rel="noopener noreferrer" class="w-full sm:w-auto px-6 py-3 rounded-lg bg-[#5865F2] hover:bg-[#4752C4] text-white font-semibold text-sm transition-all shadow-lg shadow-[#5865F2]/30 flex items-center justify-center space-x-2">
                                 <i data-lucide="user-plus" class="w-4 h-4"></i>
                                 <span>Add Friend / DM on Discord</span>
                             </a>
