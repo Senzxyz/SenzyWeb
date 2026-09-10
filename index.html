@@ -171,7 +171,6 @@
             }
         }
 
-        // เปิดระบบ Realtime ฟังการเปลี่ยนแปลงจาก Supabase ฐานข้อมูลโดยตรง
         function setupRealtimeSubscriptions() {
             supabaseClient
                 .channel('public-db-changes')
