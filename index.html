@@ -4,6 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SENZY HUB — One Loader. Every Supported Game.</title>
+    
+    <!-- Link Preview Meta Tags (Discord Embed Style) -->
+    <meta property="og:title" content="SENZY HUB">
+    <meta property="og:description" content="One loader for every supported game. Free, no key, always updated.">
+    <meta property="og:image" content="https://raw.githubusercontent.com/senzxyz2xxx/SenzyHub/refs/heads/main/senz2.png">
+    <meta property="og:url" content="https://senzyhub.vercel.app">
+    <meta name="theme-color" content="#ec4899">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/senzxyz2xxx/SenzyHub/refs/heads/main/senz2.png">
+
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -23,7 +35,9 @@
             }
         }
     </script>
+    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Supabase JS SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         @keyframes fadeIn {
@@ -41,12 +55,15 @@
 </head>
 <body class="bg-[#070709] text-white min-h-screen flex flex-col antialiased">
 
+    <!-- NAVBAR -->
     <header class="sticky top-0 z-50 bg-[#0a0a0c]/80 backdrop-blur-md border-b border-pink-500/10">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
             <a href="#" onclick="router.navigate('home')" class="flex items-center space-x-2 cursor-pointer">
+                <img src="https://raw.githubusercontent.com/senzxyz2xxx/SenzyHub/refs/heads/main/senz2.png" class="w-8 h-8 rounded-full border border-pink-500/30 object-cover" />
                 <span class="font-bold tracking-wider text-xl text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-pink-600">SENZY HUB</span>
             </a>
 
+            <!-- Desktop Navigation -->
             <nav class="hidden md:flex items-center space-x-8 text-sm font-medium text-neutral-400">
                 <button onclick="router.navigate('home')" class="hover:text-pink-400 transition-colors">Home</button>
                 <button onclick="router.navigate('games')" class="hover:text-pink-400 transition-colors">Games</button>
@@ -58,11 +75,13 @@
                 </a>
             </nav>
 
+            <!-- Mobile Menu Button -->
             <button onclick="toggleMobileMenu()" class="md:hidden p-2 text-neutral-400 hover:text-pink-400 focus:outline-none">
                 <i data-lucide="menu" id="menu-icon" class="w-6 h-6"></i>
             </button>
         </div>
 
+        <!-- Mobile Dropdown -->
         <div id="mobile-menu" class="hidden md:hidden bg-[#0a0a0c] border-b border-pink-500/10 px-4 pt-2 pb-4 space-y-3">
             <button onclick="router.navigate('home'); toggleMobileMenu();" class="block w-full text-left text-neutral-300 hover:text-pink-400 py-1">Home</button>
             <button onclick="router.navigate('games'); toggleMobileMenu();" class="block w-full text-left text-neutral-300 hover:text-pink-400 py-1">Games</button>
@@ -75,13 +94,18 @@
         </div>
     </header>
 
+    <!-- MAIN CONTENT CONTAINER -->
     <main id="app-container" class="flex-1"></main>
 
+    <!-- FOOTER -->
     <footer class="border-t border-pink-500/10 bg-[#070709] text-neutral-400 py-12 mt-20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center space-y-6 md:space-y-0">
-            <div>
-                <span class="font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-pink-600 text-lg tracking-wider">SENZY HUB</span>
-                <p class="text-xs text-neutral-500 mt-1">One Loader. Every Supported Game.</p>
+            <div class="flex items-center space-x-3">
+                <img src="https://raw.githubusercontent.com/senzxyz2xxx/SenzyHub/refs/heads/main/senz2.png" class="w-8 h-8 rounded-full border border-pink-500/30 object-cover" />
+                <div>
+                    <span class="font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-pink-600 text-lg tracking-wider">SENZY HUB</span>
+                    <p class="text-xs text-neutral-500 mt-0.5">One loader for every supported game. Free, no key, always updated.</p>
+                </div>
             </div>
             <div class="flex space-x-6 text-sm">
                 <button onclick="router.navigate('home')" class="hover:text-pink-400 transition-colors">Home</button>
@@ -96,13 +120,14 @@
         </div>
     </footer>
 
+    <!-- JAVASCRIPT APP LOGIC -->
     <script>
         let supabaseClient = null;
         let ADMIN_UUID = '';
         
         const siteConfig = {
             name: "SENZY HUB",
-            tagline: "One Loader. Every Supported Game.",
+            tagline: "One loader for every supported game. Free, no key, always updated.",
             loaderUrl: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/senzxyz2xxx/SenzyHub/refs/heads/main/Loader.lua"))()',
             discordUrl: "https://discord.gg/rhPgnAJE4B",
         };
@@ -324,7 +349,7 @@
                             </div>
                             <div class="space-y-3">
                                 <h1 class="text-4xl sm:text-6xl font-extrabold tracking-tight text-white">One Loader. Every Supported Game.</h1>
-                                <p class="text-base sm:text-lg text-neutral-400 max-w-2xl mx-auto">Use a single loader from <span class="text-pink-400 font-semibold">SENZY HUB</span> to automatically detect and run supported games instantly.</p>
+                                <p class="text-base sm:text-lg text-neutral-400 max-w-2xl mx-auto">${siteConfig.tagline}</p>
                             </div>
                             
                             <!-- STATS COUNTER -->
@@ -340,13 +365,11 @@
                             </div>
 
                             <!-- PROMINENT UNIVERSAL LOADER BOX -->
-                            <div class="w-full max-w-3xl mx-auto rounded-2xl bg-[#101014] border-2 border-pink-500/50 overflow-hidden shadow-2xl shadow-pink-500/20 text-left mt-6">
-                                <div class="flex items-center justify-between px-5 py-3.5 bg-[#15151a] border-b border-pink-500/20">
+                            <div class="w-full max-w-3xl mx-auto rounded-xl bg-[#101014] border border-white/[0.08] border-l-4 border-l-[#5865F2] overflow-hidden shadow-2xl text-left mt-6">
+                                <div class="flex items-center justify-between px-5 py-3.5 bg-[#15151a] border-b border-white/[0.06]">
                                     <div class="flex items-center space-x-2">
-                                        <div class="w-3 h-3 rounded-full bg-pink-500/80 animate-pulse"></div>
-                                        <div class="w-3 h-3 rounded-full bg-neutral-600"></div>
-                                        <div class="w-3 h-3 rounded-full bg-neutral-600"></div>
-                                        <span class="text-xs text-pink-300 font-mono font-semibold ml-2">SENZY_LOADER.lua</span>
+                                        <div class="w-3 h-3 rounded-full bg-[#5865F2] animate-pulse"></div>
+                                        <span class="text-xs text-neutral-300 font-mono font-bold tracking-wide">SENZY HUB — Universal Loader</span>
                                     </div>
                                     <div class="relative">
                                         <button onclick="copyLoader()" id="copy-btn-text" class="flex items-center space-x-2 px-4 py-2 rounded-lg bg-pink-500 hover:bg-pink-600 text-xs font-bold text-white transition-all shadow-lg shadow-pink-500/30">
