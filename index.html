@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SENZY HUB — One Loader. Every Supported Game.</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        background: '#070709',
+                        card: '#101014',
+                        primary: {
+                            DEFAULT: '#ec4899',
+                            hover: '#db2777',
+                            light: '#f472b6',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Supabase JS SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.2s ease-out forwards;
+        }
+        ::selection {
+            background: #ec4899;
+            color: #ffffff;
+        }
+    </style>
+</head>
+<body class="bg-[#070709] text-white min-h-screen flex flex-col antialiased">
+
+    <!-- NAVBAR -->
+    <header class="sticky top-0 z-50 bg-[#0a0a0c]/80 backdrop-blur-md border-b border-pink-500/10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <a href="#" onclick="router.navigate('home')" class="flex items-center space-x-2 cursor-pointer">
+                <span class="font-bold tracking-wider text-xl text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-pink-600">SENZY HUB</span>
+            </a>
+
+            <!-- Desktop Navigation -->
+            <nav class="hidden md:flex items-center space-x-8 text-sm font-medium text-neutral-400">
+                <button onclick="router.navigate('home')" class="hover:text-pink-400 transition-colors">Home</button>
+                <button onclick="router.navigate('games')" class="hover:text-pink-400 transition-colors">Games</button>
+                <button onclick="router.navigate('donate')" class="hover:text-pink-400 transition-colors">Donate</button>
+                <div id="nav-admin-container"></div>
+                <a href="https://discord.gg/rhPgnAJE4B" target="_blank" rel="noopener noreferrer" class="flex items-center space-x-1 hover:text-pink-400 transition-colors">
+                    <span>Discord</span>
+                    <i data-lucide="external-link" class="w-3.5 h-3.5 opacity-70"></i>
+                </a>
+            </nav>
+
+            <!-- Mobile Menu Button -->
+            <button onclick="toggleMobileMenu()" class="md:hidden p-2 text-neutral-400 hover:text-pink-400 focus:outline-none">
+                <i data-lucide="menu" id="menu-icon" class="w-6 h-6"></i>
+            </button>
+        </div>
+
+        <!-- Mobile Dropdown -->
+        <div id="mobile-menu" class="hidden md:hidden bg-[#0a0a0c] border-b border-pink-500/10 px-4 pt-2 pb-4 space-y-3">
+            <button onclick="router.navigate('home'); toggleMobileMenu();" class="block w-full text-left text-neutral-300 hover:text-pink-400 py-1">Home</button>
+            <button onclick="router.navigate('games'); toggleMobileMenu();" class="block w-full text-left text-neutral-300 hover:text-pink-400 py-1">Games</button>
+            <button onclick="router.navigate('donate'); toggleMobileMenu();" class="block w-full text-left text-neutral-300 hover:text-pink-400 py-1">Donate</button>
+            <div id="mobile-admin-container"></div>
+            <a href="https://discord.gg/rhPgnAJE4B" target="_blank" rel="noopener noreferrer" class="flex items-center space-x-1 text-neutral-300 hover:text-pink-400 py-1">
+                <span>Discord</span>
+                <i data-lucide="external-link" class="w-3.5 h-3.5 opacity-70"></i>
+            </a>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <main id="app-container" class="flex-1">
+        <!-- Rendered dynamically -->
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="border-t border-pink-500/10 bg-[#070709] text-neutral-400 py-12 mt-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center space-y-6 md:space-y-0">
+            <div>
+                <span class="font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-pink-600 text-lg tracking-wider">SENZY HUB</span>
+                <p class="text-xs text-neutral-500 mt-1">One Loader. Every Supported Game.</p>
+            </div>
+            <div class="flex space-x-6 text-sm">
+                <button onclick="router.navigate('home')" class="hover:text-pink-400 transition-colors">Home</button>
+                <button onclick="router.navigate('games')" class="hover:text-pink-400 transition-colors">Games</button>
+                <button onclick="router.navigate('donate')" class="hover:text-pink-400 transition-colors">Donate</button>
+                <a href="https://discord.gg/rhPgnAJE4B" target="_blank" rel="noopener noreferrer" class="hover:text-pink-400 transition-colors">Discord</a>
+            </div>
+        </div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 pt-6 border-t border-white/[0.04] text-xs text-neutral-600 flex flex-col sm:flex-row justify-between items-center space-y-3 sm:space-y-0">
+            <p>© <span id="current-year"></span> SENZY HUB. All rights reserved.</p>
+            <p class="text-center sm:text-right">SENZY HUB is not affiliated with, endorsed, or sponsored by Roblox Corporation.</p>
+        </div>
+    </footer>
+
+    <!-- JAVASCRIPT APP LOGIC -->
+    <script>
+        const SUPABASE_URL = window.ENV?.SUPABASE_URL || 'https://YOUR_SUPABASE_URL.supabase.co';
+        const SUPABASE_ANON_KEY = window.ENV?.SUPABASE_ANON_KEY || 'YOUR_SUPABASE_ANON_KEY';
+        const ADMIN_DISCORD_ID = window.ENV?.ADMIN_DISCORD_ID || 'YOUR_DISCORD_USER_ID'; 
+        
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        const siteConfig = {
+            name: "SENZY HUB",
+            tagline: "One Loader. Every Supported Game.",
+            loaderUrl: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/senzxyz2xxx/SenzyHub/refs/heads/main/Loader.lua"))()',
+            discordUrl: "https://discord.gg/rhPgnAJE4B",
+        };
+
+        let loadedGames = [];
+        let currentRoute = 'home';
+        let routeParam = null;
+        let currentUser = null;
+        let stats = { views: 0, copies: 0 };
+
+        function slugify(text) {
+            return text.toLowerCase().replace(/[^\w ]+/g, "").replace(/ +/g, "-");
+        }
+
+        async function initApp() {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (session && session.user) {
+                const providerId = session.user.user_metadata?.provider_id || session.user.identities?.[0]?.id;
+                const userName = session.user.user_metadata?.full_name || session.user.user_metadata?.name || "Admin";
+                const avatarUrl = session.user.user_metadata?.avatar_url || "";
+
+                currentUser = {
+                    id: providerId,
+                    name: userName,
+                    avatar: avatarUrl,
+                    isAdmin: providerId === ADMIN_DISCORD_ID
+                };
+            }
+
+            await fetchStats();
+            await incrementViews();
+            await initGames();
+            updateNavbarAuth();
+        }
+
+        async function fetchStats() {
+            try {
+                const { data, error } = await supabaseClient.from('site_stats').select('*').eq('id', 1).single();
+                if (data) {
+                    stats = { views: data.views || 0, copies: data.copies || 0 };
+                }
+            } catch (err) {
+                console.error("Error fetching stats:", err);
+            }
+        }
+
+        async function incrementViews() {
+            try {
+                // ป้องกันนับซ้ำใน Tab เดียวกันระหว่าง session
+                if (!sessionStorage.getItem('viewed')) {
+                    sessionStorage.setItem('viewed', 'true');
+                    const { data } = await supabaseClient.from('site_stats').select('views').eq('id', 1).single();
+                    if (data) {
+                        const newViews = (data.views || 0) + 1;
+                        await supabaseClient.from('site_stats').update({ views: newViews }).eq('id', 1);
+                        stats.views = newViews;
+                    }
+                }
+            } catch (err) {
+                console.error("Error incrementing views:", err);
+            }
+        }
+
+        async function incrementCopies() {
+            try {
+                const { data } = await supabaseClient.from('site_stats').select('copies').eq('id', 1).single();
+                if (data) {
+                    const newCopies = (data.copies || 0) + 1;
+                    await supabaseClient.from('site_stats').update({ copies: newCopies }).eq('id', 1);
+                    stats.copies = newCopies;
+                    updateStatsUI();
+                }
+            } catch (err) {
+                console.error("Error incrementing copies:", err);
+            }
+        }
+
+        function updateStatsUI() {
+            const viewsEl = document.getElementById('stat-views');
+            const copiesEl = document.getElementById('stat-copies');
+            if (viewsEl) viewsEl.textContent = stats.views.toLocaleString();
+            if (copiesEl) copiesEl.textContent = stats.copies.toLocaleString();
+        }
+
+        async function loginWithDiscord() {
+            const { error } = await supabaseClient.auth.signInWithOAuth({
+                provider: 'discord',
+                options: {
+                    redirectTo: window.location.origin
+                }
+            });
+            if (error) alert("Login Error: " + error.message);
+        }
+
+        async function logout() {
+            await supabaseClient.auth.signOut();
+            currentUser = null;
+            window.location.href = window.location.origin;
+        }
+
+        function updateNavbarAuth() {
+            const navContainer = document.getElementById('nav-admin-container');
+            const mobileContainer = document.getElementById('mobile-admin-container');
+
+            if (currentUser && currentUser.isAdmin) {
+                navContainer.innerHTML = `<button onclick="router.navigate('admin')" class="text-xs px-2.5 py-1 rounded bg-pink-500/10 text-pink-400 border border-pink-500/20 hover:bg-pink-500/20 transition-colors">+ Add Game</button>`;
+                mobileContainer.innerHTML = `<button onclick="router.navigate('admin'); toggleMobileMenu();" class="block w-full text-left text-pink-400 py-1 font-semibold">+ Add Game (Admin)</button>`;
+            } else {
+                navContainer.innerHTML = `<button onclick="loginWithDiscord()" class="text-xs px-3 py-1.5 rounded-lg bg-[#5865F2] hover:bg-[#4752C4] text-white font-medium transition-colors flex items-center space-x-1.5"><span>Admin Login</span></button>`;
+                mobileContainer.innerHTML = `<button onclick="loginWithDiscord()" class="block w-full text-left text-[#5865F2] py-1 font-semibold">Admin Login with Discord</button>`;
+            }
+        }
+
+        async function initGames() {
+            try {
+                const { data, error } = await supabaseClient.from('games').select('*');
+                if (error) throw error;
+                if (data) {
+                    loadedGames = data.map((item) => ({
+                        placeId: item.place_id,
+                        slug: slugify(item.name),
+                        name: item.name,
+                        description: item.description || "Full Auto",
+                        thumbnail: item.thumbnail || "https://tr.rbxcdn.com/180DAY-74e3238344382f02297e172c0366b7a5/768/432/Image/Webp/noFilter",
+                        features: item.features || ["Full Auto"]
+                    }));
+                }
+            } catch (err) {
+                console.error("Fetch games error:", err);
+                loadedGames = [];
+            }
+            render();
+        }
+
+        const router = {
+            navigate: (route, param = null) => {
+                if (route === 'admin' && (!currentUser || !currentUser.isAdmin)) {
+                    alert("Access Denied! You are not authorized as admin.");
+                    loginWithDiscord();
+                    return;
+                }
+                currentRoute = route;
+                routeParam = param;
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                render();
+            }
+        };
+
+        function toggleMobileMenu() {
+            document.getElementById('mobile-menu').classList.toggle('hidden');
+        }
+
+        function copyLoader() {
+            navigator.clipboard.writeText(siteConfig.loaderUrl);
+            incrementCopies(); // นับยอดคนกดกัดลอกสคริปต์
+            const btn = document.getElementById('copy-btn-text');
+            const toast = document.getElementById('toast-notification');
+            btn.textContent = "Copied";
+            toast.classList.remove('hidden');
+            setTimeout(() => {
+                btn.textContent = "Copy";
+                toast.classList.add('hidden');
+            }, 2500);
+        }
+
+        // --- VIEWS ---
+        function renderHome() {
+            return `
+                <div class="space-y-24 pb-12">
+                    <section class="relative pt-20 pb-12 text-center px-4">
+                        <div class="max-w-3xl mx-auto space-y-6">
+                            <div class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-pink-500/10 text-pink-400 border border-pink-500/20">
+                                <span>${loadedGames.length}+ Supported Games & Counting</span>
+                            </div>
+                            <h1 class="text-4xl sm:text-6xl font-extrabold tracking-tight text-white">One Loader. Every Supported Game.</h1>
+                            <p class="text-base sm:text-lg text-neutral-400 max-w-2xl mx-auto">Use a single loader from <span class="text-pink-400 font-semibold">SENZY HUB</span> to automatically detect and run supported games instantly.</p>
+                            
+                            <!-- STATS COUNTER -->
+                            <div class="flex justify-center items-center gap-8 pt-4">
+                                <div class="px-5 py-3 rounded-xl bg-[#101014] border border-pink-500/20 shadow-lg">
+                                    <p class="text-xs text-neutral-400 uppercase tracking-wider">Total Views</p>
+                                    <p id="stat-views" class="text-2xl font-bold text-pink-400">${stats.views.toLocaleString()}</p>
+                                </div>
+                                <div class="px-5 py-3 rounded-xl bg-[#101014] border border-pink-500/20 shadow-lg">
+                                    <p class="text-xs text-neutral-400 uppercase tracking-wider">Script Copies</p>
+                                    <p id="stat-copies" class="text-2xl font-bold text-pink-400">${stats.copies.toLocaleString()}</p>
+                                </div>
+                            </div>
+
+                            <div class="flex flex-col sm:flex-row justify-center items-center space-y-3 sm:space-y-0 sm:space-x-4 pt-4">
+                                <a href="#loader" class="w-full sm:w-auto px-6 py-3 rounded-lg bg-pink-500 text-white font-semibold text-sm hover:bg-pink-600 transition-colors text-center shadow-lg shadow-pink-500/25">Get Loader</a>
+                                <button onclick="router.navigate('games')" class="w-full sm:w-auto px-6 py-3 rounded-lg bg-[#101014] text-white font-semibold text-sm border border-white/[0.1] hover:border-pink-500/50 transition-colors">Browse Games</button>
+                            </div>
+                        </div>
+                    </section>
+                    <section id="loader" class="max-w-4xl mx-auto px-4">
+                        <div class="text-center mb-8 space-y-2">
+                            <h2 class="text-2xl font-bold text-white">Universal Loader</h2>
+                            <p class="text-sm text-neutral-400">One loader for every supported game in SENZY HUB.</p>
+                        </div>
+                        <div class="w-full max-w-2xl mx-auto rounded-xl bg-[#101014] border border-pink-500/20 overflow-hidden shadow-2xl shadow-pink-500/5">
+                            <div class="flex items-center justify-between px-4 py-3 bg-[#15151a] border-b border-white/[0.06]">
+                                <div class="flex items-center space-x-2">
+                                    <div class="w-2.5 h-2.5 rounded-full bg-neutral-600"></div>
+                                    <div class="w-2.5 h-2.5 rounded-full bg-neutral-600"></div>
+                                    <div class="w-2.5 h-2.5 rounded-full bg-neutral-600"></div>
+                                    <span class="text-xs text-neutral-500 font-mono ml-2">loader.lua</span>
+                                </div>
+                                <div class="relative">
+                                    <button onclick="copyLoader()" class="flex items-center space-x-1.5 px-3 py-1.5 rounded-md bg-white/[0.06] hover:bg-pink-500/20 text-xs font-medium text-neutral-300 hover:text-pink-400 transition-all border border-white/[0.08]">
+                                        <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                                        <span id="copy-btn-text">Copy</span>
+                                    </button>
+                                    <div id="toast-notification" class="hidden absolute right-0 -bottom-10 bg-[#121216] border border-pink-500/30 text-white text-[11px] px-3 py-1 rounded shadow-lg whitespace-nowrap animate-fade-in">Loader copied to clipboard.</div>
+                                </div>
+                            </div>
+                            <div class="p-4 font-mono text-xs sm:text-sm text-pink-300 overflow-x-auto"><code>${siteConfig.loaderUrl}</code></div>
+                        </div>
+                    </section>
+                    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div class="flex justify-between items-end mb-8">
+                            <div>
+                                <h2 class="text-2xl font-bold text-white">Supported Games</h2>
+                                <p class="text-sm text-neutral-400 mt-1">Preview of top experiences compatible with SENZY HUB.</p>
+                            </div>
+                            <button onclick="router.navigate('games')" class="hidden sm:flex items-center space-x-1 text-sm font-medium text-pink-400 hover:text-pink-300 transition-colors">
+                                <span>View All Games</span>
+                                <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                            ${loadedGames.slice(0, 6).map(game => renderGameCard(game)).join('')}
+                        </div>
+                    </section>
+                </div>
+            `;
+        }
+
+        function renderGames() {
+            return `
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-12 animate-fade-in">
+                    <div class="text-center space-y-3">
+                        <h1 class="text-3xl sm:text-4xl font-extrabold text-white">Supported Games</h1>
+                        <p class="text-sm sm:text-base text-neutral-400 max-w-xl mx-auto">Explore every Roblox experience currently supported by SENZY HUB.</p>
+                        <div class="inline-block px-3 py-1 rounded-full bg-pink-500/10 text-pink-400 border border-pink-500/20 text-xs font-medium">
+                            <span>${loadedGames.length}</span> Games Available
+                        </div>
+                    </div>
+                    <div class="space-y-8">
+                        <div class="relative max-w-md mx-auto">
+                            <i data-lucide="search" class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500"></i>
+                            <input type="text" oninput="filterGames(this.value)" placeholder="Search games..." class="w-full pl-10 pr-4 py-2.5 rounded-lg bg-[#101014] border border-white/[0.08] text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-pink-500 transition-colors"/>
+                        </div>
+                        <div id="games-grid-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                            ${loadedGames.map(game => renderGameCard(game)).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderGameDetail(slug) {
+            const game = loadedGames.find(g => g.slug === slug);
+            if (!game) return renderGames();
+            return `
+                <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-8 animate-fade-in">
+                    <button onclick="router.navigate('games')" class="inline-flex items-center space-x-2 text-xs font-medium text-neutral-400 hover:text-pink-400 transition-colors">
+                        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                        <span>Back to Games</span>
+                    </button>
+                    <div class="rounded-2xl bg-[#101014] border border-pink-500/20 overflow-hidden p-6 sm:p-8 space-y-6 shadow-xl shadow-pink-500/5">
+                        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+                            <div class="flex items-center space-x-4">
+                                <div class="relative w-20 h-20 sm:w-24 sm:h-24 rounded-xl overflow-hidden bg-neutral-900 border border-white/[0.08] flex-shrink-0">
+                                    <img src="${game.thumbnail}" alt="${game.name}" class="w-full h-full object-cover" />
+                                </div>
+                                <div class="space-y-2">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-pink-500/10 text-pink-400 border border-pink-500/20">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-pink-400 mr-1.5 animate-pulse"></span> Supported
+                                    </span>
+                                    <h1 class="text-2xl sm:text-3xl font-bold text-white">${game.name}</h1>
+                                </div>
+                            </div>
+                            <a href="https://www.roblox.com/games/${game.placeId}" target="_blank" rel="noopener noreferrer" class="w-full sm:w-auto inline-flex items-center justify-center space-x-2 px-5 py-2.5 rounded-lg bg-pink-500 text-white font-semibold text-sm hover:bg-pink-600 transition-colors shadow-lg shadow-pink-500/25">
+                                <span>Play Game</span>
+                                <i data-lucide="external-link" class="w-4 h-4"></i>
+                            </a>
+                        </div>
+                        <div class="pt-4 border-t border-white/[0.06]">
+                            <h3 class="text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-2">Description</h3>
+                            <p class="text-sm text-neutral-300 leading-relaxed">${game.description}</p>
+                        </div>
+                    </div>
+                    <div class="space-y-4">
+                        <h3 class="text-lg font-semibold text-white">Supported Features</h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            ${game.features.map(feat => `
+                                <div class="flex items-center space-x-3 p-3 rounded-lg bg-[#101014] border border-white/[0.06]">
+                                    <div class="p-1 rounded bg-pink-500/10 text-pink-400"><i data-lucide="check" class="w-4 h-4"></i></div>
+                                    <span class="text-sm font-medium text-neutral-200">${feat}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderAdmin() {
+            if (!currentUser || !currentUser.isAdmin) {
+                return `
+                    <div class="max-w-md mx-auto px-4 py-24 text-center space-y-4 animate-fade-in">
+                        <h1 class="text-2xl font-bold text-red-400">Access Denied</h1>
+                        <p class="text-sm text-neutral-400">You are not authorized to view this page. Please log in with the administrator Discord account.</p>
+                        <button onclick="loginWithDiscord()" class="px-5 py-2.5 rounded-lg bg-[#5865F2] text-white font-medium text-sm">Login with Discord</button>
+                    </div>
+                `;
+            }
+
+            return `
+                <div class="max-w-xl mx-auto px-4 py-16 space-y-8 animate-fade-in">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h1 class="text-2xl font-bold text-white">Add Game via Link</h1>
+                            <p class="text-sm text-neutral-400">Welcome back, Admin ${currentUser.name}</p>
+                        </div>
+                        <button onclick="logout()" class="text-xs text-red-400 border border-red-500/20 px-3 py-1.5 rounded-lg hover:bg-red-500/10">Logout</button>
+                    </div>
+
+                    <div class="p-6 rounded-2xl bg-[#101014] border border-pink-500/20 space-y-4 shadow-xl">
+                        <div>
+                            <label class="block text-xs font-medium text-neutral-300 mb-1">Roblox Game URL</label>
+                            <input type="text" id="roblox-url-input" placeholder="https://www.roblox.com/games/106484206883664/..." class="w-full px-4 py-2.5 rounded-lg bg-neutral-900 border border-white/[0.1] text-sm text-white focus:outline-none focus:border-pink-500" />
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-neutral-300 mb-1">Features (Comma separated)</label>
+                            <input type="text" id="roblox-features-input" value="Full Auto, Auto Farm" class="w-full px-4 py-2.5 rounded-lg bg-neutral-900 border border-white/[0.1] text-sm text-white focus:outline-none focus:border-pink-500" />
+                        </div>
+                        <button onclick="handleAutoAddGame()" id="add-game-btn" class="w-full py-3 rounded-lg bg-pink-500 hover:bg-pink-600 text-white font-semibold text-sm transition-colors shadow-lg shadow-pink-500/25">Fetch & Save Game</button>
+                        <p id="fetch-status" class="text-xs text-center text-neutral-400 mt-2"></p>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function handleAutoAddGame() {
+            const urlInput = document.getElementById('roblox-url-input').value.trim();
+            const featuresInput = document.getElementById('roblox-features-input').value.trim();
+            const statusEl = document.getElementById('fetch-status');
+            const btn = document.getElementById('add-game-btn');
+
+            const match = urlInput.match(/\/games\/(\d+)/);
+            if (!match) {
+                statusEl.textContent = "❌ Invalid Roblox URL format.";
+                statusEl.className = "text-xs text-center text-red-400 mt-2";
+                return;
+            }
+
+            const placeId = match[1];
+            statusEl.textContent = "⏳ Fetching details from Roblox API...";
+            statusEl.className = "text-xs text-center text-yellow-400 mt-2";
+            btn.disabled = true;
+
+            try {
+                const universeRes = await fetch(`https://apis.roblox.com/universes/v1/places/${placeId}/universe`);
+                const universeData = await universeRes.json();
+                const universeId = universeData.universeId;
+
+                const detailsRes = await fetch(`https://games.roblox.com/v1/games?universeIds=${universeId}`);
+                const detailsData = await detailsRes.json();
+                const gameInfo = detailsData.data[0];
+
+                const gameName = gameInfo ? gameInfo.name : `Game ${placeId}`;
+                const gameDesc = gameInfo && gameInfo.description ? gameInfo.description.substring(0, 100) + '...' : 'Full Auto';
+
+                const thumbRes = await fetch(`https://thumbnails.roblox.com/v1/games/icons?universeIds=${universeId}&size=768x432&format=Png&isCircular=false`);
+                const thumbData = await thumbRes.json();
+                const thumbnail = thumbData.data[0] ? thumbData.data[0].imageUrl : "https://tr.rbxcdn.com/180DAY-74e3238344382f02297e172c0366b7a5/768/432/Image/Webp/noFilter";
+
+                const featuresArray = featuresInput ? featuresInput.split(',').map(s => s.trim()) : ["Full Auto"];
+
+                const { error } = await supabaseClient.from('games').insert([
+                    { place_id: placeId, name: gameName, description: gameDesc, thumbnail: thumbnail, features: featuresArray }
+                ]);
+
+                if (error) throw error;
+
+                statusEl.textContent = "✅ Game added successfully!";
+                statusEl.className = "text-xs text-center text-emerald-400 mt-2";
+                await initGames();
+                setTimeout(() => router.navigate('games'), 1500);
+
+            } catch (err) {
+                console.error(err);
+                statusEl.textContent = "❌ Failed to fetch and save game data.";
+                statusEl.className = "text-xs text-center text-red-400 mt-2";
+                btn.disabled = false;
+            }
+        }
+
+        function renderDonate() {
+            return `
+                <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-20 space-y-12 animate-fade-in">
+                    <div class="text-center space-y-3">
+                        <h1 class="text-3xl sm:text-4xl font-extrabold text-white">Support SENZY HUB</h1>
+                        <p class="text-sm sm:text-base text-neutral-400 max-w-md mx-auto">Help support the development and maintenance of SENZY HUB.</p>
+                    </div>
+                    <div class="max-w-md mx-auto text-center py-16 px-6 rounded-2xl bg-[#101014] border border-pink-500/20 relative overflow-hidden shadow-xl shadow-pink-500/5">
+                        <div class="w-36 h-36 mx-auto mb-6 rounded-xl border-2 border-dashed border-pink-500/30 flex items-center justify-center bg-neutral-900/50">
+                            <span class="text-xs font-mono text-neutral-500 tracking-wider">[ QR_PLACEHOLDER ]</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-2">Coming Soon</h3>
+                        <p class="text-sm text-neutral-400">Donation system is currently being prepared.</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderGameCard(game) {
+            return `
+                <div onclick="router.navigate('detail', '${game.slug}')" class="group flex flex-col rounded-xl bg-[#101014] border border-white/[0.08] hover:border-pink-500/50 transition-all duration-300 overflow-hidden hover:-translate-y-1 cursor-pointer">
+                    <div class="relative aspect-video w-full overflow-hidden bg-neutral-900">
+                        <img src="${game.thumbnail}" alt="${game.name}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                        <div class="absolute top-3 right-3">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-pink-500/10 text-pink-400 border border-pink-500/20">
+                                <span class="w-1.5 h-1.5 rounded-full bg-pink-400 mr-1.5 animate-pulse"></span> Supported
+                            </span>
+                        </div>
+                    </div>
+                    <div class="p-5 flex flex-col flex-1 justify-between">
+                        <div>
+                            <h3 class="font-semibold text-white text-base group-hover:text-pink-400 transition-colors line-clamp-1">${game.name}</h3>
+                            <p class="text-xs text-neutral-400 mt-1.5 line-clamp-2">${game.description}</p>
+                        </div>
+                        <div class="mt-4 pt-3 border-t border-white/[0.06] flex items-center justify-between text-xs text-neutral-400">
+                            <span class="font-medium text-neutral-300">${game.features.length} Features Available</span>
+                            <span class="flex items-center space-x-1 text-pink-400 group-hover:underline"><span>View Details</span><i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i></span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function filterGames(query) {
+            const filtered = loadedGames.filter(g => g.name.toLowerCase().includes(query.toLowerCase()));
+            const container = document.getElementById('games-grid-container');
+            if (filtered.length > 0) {
+                container.innerHTML = filtered.map(game => renderGameCard(game)).join('');
+            } else {
+                container.innerHTML = `<div class="col-span-full text-center py-16 bg-[#101014] rounded-xl border border-white/[0.08]"><p class="text-neutral-400 text-sm">No games found.</p></div>`;
+            }
+            lucide.createIcons();
+        }
+
+        function render() {
+            const container = document.getElementById('app-container');
+            if (currentRoute === 'home') container.innerHTML = renderHome();
+            else if (currentRoute === 'games') container.innerHTML = renderGames();
+            else if (currentRoute === 'detail') container.innerHTML = renderGameDetail(routeParam);
+            else if (currentRoute === 'donate') container.innerHTML = renderDonate();
+            else if (currentRoute === 'admin') container.innerHTML = renderAdmin();
+            lucide.createIcons();
+        }
+
+        document.getElementById('current-year').textContent = new Date().getFullYear();
+        initApp();
+    </script>
+</body>
+</html>
