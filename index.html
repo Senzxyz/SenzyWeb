@@ -335,7 +335,6 @@
                     if (game) {
                         try {
                             const newViews = (game.views || 0) + 1;
-                            // อัปเดตเฉพาะวิว โดยไม่ไปยุ่งกับสถานะหรือฟิลด์อื่น
                             await supabaseClient.from('games').update({ views: newViews }).eq('id', game.id);
                             game.views = newViews;
                         } catch (err) {
@@ -725,15 +724,20 @@
             btn.disabled = true;
 
             try {
+                // ค้นหาเกมเดิมในเครื่องเพื่อดึงยอด views เดิมติดตัวไปด้วย
+                const existingGame = loadedGames.find(g => g.id == id);
+                const currentViews = existingGame ? (existingGame.views || 0) : 0;
+
                 const featuresArray = featuresInput ? featuresInput.split(',').map(s => s.trim()) : ["Full Auto"];
                 
-                // ส่งเฉพาะฟิลด์ข้อมูลเกมหลัก โดยปล่อยฟิลด์ views ไว้ให้ปลอดภัย ไม่โดนรีเซ็ต
+                // ส่งข้อมูลอัปเดตพร้อมแนบยอด views เดิมกลับลงไปในฐานข้อมูลด้วย ป้องกันวิวหาย
                 const updatePayload = {
                     place_id: placeId,
                     name: name,
                     thumbnail: thumbnail,
                     status: statusVal,
                     features: featuresArray,
+                    views: currentViews,
                     updated_at: new Date().toISOString()
                 };
 
