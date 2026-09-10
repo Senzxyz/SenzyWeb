@@ -113,7 +113,13 @@
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5jZWJ3and6YnNqZnJuZHduenNjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEyNDk3MzMsImV4cCI6MjA1Njg4NTczM30.YOUR_ACTUAL_ANON_KEY'; 
         const ADMIN_DISCORD_ID = 'YOUR_DISCORD_USER_ID'; 
         
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+            auth: {
+                persistSession: true,
+                autoRefreshToken: true,
+                detectSessionInUrl: true
+            }
+        });
 
         const siteConfig = {
             name: "SENZY HUB",
@@ -134,22 +140,8 @@
 
         async function initApp() {
             try {
-                // ดึงค่า Token จาก Hash URL แบบปลอดภัย
-                const hash = window.location.hash;
-                if (hash && hash.includes('access_token')) {
-                    const params = new URLSearchParams(hash.substring(1));
-                    const accessToken = params.get('access_token');
-                    const refreshToken = params.get('refresh_token');
-                    if (accessToken) {
-                        await supabaseClient.auth.setSession({
-                            access_token: accessToken,
-                            refresh_token: refreshToken
-                        });
-                        window.history.replaceState(null, null, window.location.pathname);
-                    }
-                }
-
-                const { data: { session } } = await supabaseClient.auth.getSession();
+                // ให้ SDK ตรวจสอบเซสชันจาก URL หรือ LocalStorage อัตโนมัติ
+                const { data: { session }, error } = await supabaseClient.auth.getSession();
                 if (session && session.user) {
                     const providerId = session.user.user_metadata?.provider_id || session.user.identities?.[0]?.id || session.user.id;
                     const userName = session.user.user_metadata?.full_name || session.user.user_metadata?.name || session.user.email || "User";
