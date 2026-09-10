@@ -56,7 +56,7 @@
                 <button onclick="router.navigate('home')" class="hover:text-pink-400 transition-colors">Home</button>
                 <button onclick="router.navigate('games')" class="hover:text-pink-400 transition-colors">Games</button>
                 <button onclick="router.navigate('donate')" class="hover:text-pink-400 transition-colors">Donate</button>
-                <div id="nav-admin-container"></div>
+                <div id="nav-auth-container"></div>
                 <a href="https://discord.gg/rhPgnAJE4B" target="_blank" rel="noopener noreferrer" class="flex items-center space-x-1 hover:text-pink-400 transition-colors">
                     <span>Discord</span>
                     <i data-lucide="external-link" class="w-3.5 h-3.5 opacity-70"></i>
@@ -74,7 +74,7 @@
             <button onclick="router.navigate('home'); toggleMobileMenu();" class="block w-full text-left text-neutral-300 hover:text-pink-400 py-1">Home</button>
             <button onclick="router.navigate('games'); toggleMobileMenu();" class="block w-full text-left text-neutral-300 hover:text-pink-400 py-1">Games</button>
             <button onclick="router.navigate('donate'); toggleMobileMenu();" class="block w-full text-left text-neutral-300 hover:text-pink-400 py-1">Donate</button>
-            <div id="mobile-admin-container"></div>
+            <div id="mobile-auth-container"></div>
             <a href="https://discord.gg/rhPgnAJE4B" target="_blank" rel="noopener noreferrer" class="flex items-center space-x-1 text-neutral-300 hover:text-pink-400 py-1">
                 <span>Discord</span>
                 <i data-lucide="external-link" class="w-3.5 h-3.5 opacity-70"></i>
@@ -109,9 +109,12 @@
 
     <!-- JAVASCRIPT APP LOGIC -->
     <script>
-        const SUPABASE_URL = window.ENV?.SUPABASE_URL || 'https://YOUR_SUPABASE_URL.supabase.co';
-        const SUPABASE_ANON_KEY = window.ENV?.SUPABASE_ANON_KEY || 'YOUR_SUPABASE_ANON_KEY';
-        const ADMIN_DISCORD_ID = window.ENV?.ADMIN_DISCORD_ID || 'YOUR_DISCORD_USER_ID'; 
+        // รองรับการอ่านค่าจาก Vercel Environment Variables ผ่านช่องทางรันไทม์ หรือแทนค่าตรงนี้
+        const SUPABASE_URL = 'https://ncebwjwzbsjfrndwnzsc.supabase.co'; 
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5jZWJ3and6YnNqZnJuZHduenNjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEyNDk3MzMsImV4cCI6MjA1Njg4NTczM30.YOUR_ACTUAL_ANON_KEY'; // เอา Anon Key จากหน้าเว็บ Supabase มาใส่ตรงนี้แทนถ้าใน Vercel ยังไม่อ่าน
+        
+        // 🛑 ใส่ Discord User ID ของมึงตรงนี้ (หรือตั้งใน Vercel Env แล้วดึงค่า)
+        const ADMIN_DISCORD_ID = 'YOUR_DISCORD_USER_ID'; 
         
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -136,7 +139,7 @@
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (session && session.user) {
                 const providerId = session.user.user_metadata?.provider_id || session.user.identities?.[0]?.id;
-                const userName = session.user.user_metadata?.full_name || session.user.user_metadata?.name || "Admin";
+                const userName = session.user.user_metadata?.full_name || session.user.user_metadata?.name || "User";
                 const avatarUrl = session.user.user_metadata?.avatar_url || "";
 
                 currentUser = {
@@ -155,7 +158,7 @@
 
         async function fetchStats() {
             try {
-                const { data, error } = await supabaseClient.from('site_stats').select('*').eq('id', 1).single();
+                const { data } = await supabaseClient.from('site_stats').select('*').eq('id', 1).single();
                 if (data) {
                     stats = { views: data.views || 0, copies: data.copies || 0 };
                 }
@@ -166,7 +169,6 @@
 
         async function incrementViews() {
             try {
-                // ป้องกันนับซ้ำใน Tab เดียวกันระหว่าง session
                 if (!sessionStorage.getItem('viewed')) {
                     sessionStorage.setItem('viewed', 'true');
                     const { data } = await supabaseClient.from('site_stats').select('views').eq('id', 1).single();
@@ -219,15 +221,32 @@
         }
 
         function updateNavbarAuth() {
-            const navContainer = document.getElementById('nav-admin-container');
-            const mobileContainer = document.getElementById('mobile-admin-container');
+            const navContainer = document.getElementById('nav-auth-container');
+            const mobileContainer = document.getElementById('mobile-auth-container');
 
-            if (currentUser && currentUser.isAdmin) {
-                navContainer.innerHTML = `<button onclick="router.navigate('admin')" class="text-xs px-2.5 py-1 rounded bg-pink-500/10 text-pink-400 border border-pink-500/20 hover:bg-pink-500/20 transition-colors">+ Add Game</button>`;
-                mobileContainer.innerHTML = `<button onclick="router.navigate('admin'); toggleMobileMenu();" class="block w-full text-left text-pink-400 py-1 font-semibold">+ Add Game (Admin)</button>`;
+            if (currentUser) {
+                let htmlContent = `
+                    <div class="flex items-center space-x-3">
+                        <div class="flex items-center space-x-2 bg-[#101014] border border-white/[0.08] px-3 py-1.5 rounded-lg">
+                            ${currentUser.avatar ? `<img src="${currentUser.avatar}" class="w-5 h-5 rounded-full" />` : ''}
+                            <span class="text-xs font-medium text-white">${currentUser.name}</span>
+                            ${currentUser.isAdmin ? '<span class="text-[10px] bg-pink-500/20 text-pink-400 px-1.5 py-0.5 rounded font-bold">ADMIN</span>' : ''}
+                        </div>
+                        ${currentUser.isAdmin ? `<button onclick="router.navigate('admin')" class="text-xs px-2.5 py-1.5 rounded bg-pink-500/10 text-pink-400 border border-pink-500/20 hover:bg-pink-500/20 transition-colors">+ Add Game</button>` : ''}
+                        <button onclick="logout()" class="text-xs text-neutral-400 hover:text-red-400 transition-colors">Logout</button>
+                    </div>
+                `;
+                navContainer.innerHTML = htmlContent;
+                mobileContainer.innerHTML = `
+                    <div class="py-2 space-y-2 border-t border-white/[0.06] mt-2">
+                        <p class="text-xs text-neutral-300">Logged in as: <span class="text-pink-400 font-semibold">${currentUser.name}</span></p>
+                        ${currentUser.isAdmin ? `<button onclick="router.navigate('admin'); toggleMobileMenu();" class="block w-full text-left text-pink-400 py-1 font-semibold">+ Add Game (Admin)</button>` : ''}
+                        <button onclick="logout()" class="block w-full text-left text-red-400 py-1">Logout</button>
+                    </div>
+                `;
             } else {
-                navContainer.innerHTML = `<button onclick="loginWithDiscord()" class="text-xs px-3 py-1.5 rounded-lg bg-[#5865F2] hover:bg-[#4752C4] text-white font-medium transition-colors flex items-center space-x-1.5"><span>Admin Login</span></button>`;
-                mobileContainer.innerHTML = `<button onclick="loginWithDiscord()" class="block w-full text-left text-[#5865F2] py-1 font-semibold">Admin Login with Discord</button>`;
+                navContainer.innerHTML = `<button onclick="loginWithDiscord()" class="text-xs px-3 py-1.5 rounded-lg bg-[#5865F2] hover:bg-[#4752C4] text-white font-medium transition-colors flex items-center space-x-1.5"><span>Login with Discord</span></button>`;
+                mobileContainer.innerHTML = `<button onclick="loginWithDiscord()" class="block w-full text-left text-[#5865F2] py-1 font-semibold">Login with Discord</button>`;
             }
         }
 
@@ -255,8 +274,7 @@
         const router = {
             navigate: (route, param = null) => {
                 if (route === 'admin' && (!currentUser || !currentUser.isAdmin)) {
-                    alert("Access Denied! You are not authorized as admin.");
-                    loginWithDiscord();
+                    alert("Access Denied! Admin only.");
                     return;
                 }
                 currentRoute = route;
@@ -272,7 +290,7 @@
 
         function copyLoader() {
             navigator.clipboard.writeText(siteConfig.loaderUrl);
-            incrementCopies(); // นับยอดคนกดกัดลอกสคริปต์
+            incrementCopies();
             const btn = document.getElementById('copy-btn-text');
             const toast = document.getElementById('toast-notification');
             btn.textContent = "Copied";
@@ -431,8 +449,8 @@
                 return `
                     <div class="max-w-md mx-auto px-4 py-24 text-center space-y-4 animate-fade-in">
                         <h1 class="text-2xl font-bold text-red-400">Access Denied</h1>
-                        <p class="text-sm text-neutral-400">You are not authorized to view this page. Please log in with the administrator Discord account.</p>
-                        <button onclick="loginWithDiscord()" class="px-5 py-2.5 rounded-lg bg-[#5865F2] text-white font-medium text-sm">Login with Discord</button>
+                        <p class="text-sm text-neutral-400">You are not authorized to view this page. Admin access required.</p>
+                        <button onclick="router.navigate('home')" class="px-5 py-2.5 rounded-lg bg-pink-500 text-white font-medium text-sm">Back to Home</button>
                     </div>
                 `;
             }
