@@ -111,7 +111,9 @@
     <script>
         const SUPABASE_URL = 'https://ncebwjwzbsjfrndwnzsc.supabase.co'; 
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5jZWJ3and6YnNqZnJuZHduenNjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEyNDk3MzMsImV4cCI6MjA1Njg4NTczM30.YOUR_ACTUAL_ANON_KEY'; 
-        const ADMIN_DISCORD_ID = 'YOUR_DISCORD_USER_ID'; 
+        
+        // 🛑 เอา UUID ของมึงจากหน้า Supabase Users ในรูปมาใส่ตรงนี้ (เช่น 'b1246426-d70-4a5d-b4fc-bb3d5ae7dd6a')
+        const ADMIN_UUID = 'b1246426-d70-4a5d-b4fc-bb3d5ae7dd6a'; 
         
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
             auth: {
@@ -140,18 +142,17 @@
 
         async function initApp() {
             try {
-                // ให้ SDK ตรวจสอบเซสชันจาก URL หรือ LocalStorage อัตโนมัติ
-                const { data: { session }, error } = await supabaseClient.auth.getSession();
+                const { data: { session } } = await supabaseClient.auth.getSession();
                 if (session && session.user) {
-                    const providerId = session.user.user_metadata?.provider_id || session.user.identities?.[0]?.id || session.user.id;
+                    const userId = session.user.id; // ใช้ Supabase UUID โดยตรง ชัวร์ที่สุด
                     const userName = session.user.user_metadata?.full_name || session.user.user_metadata?.name || session.user.email || "User";
                     const avatarUrl = session.user.user_metadata?.avatar_url || "";
 
                     currentUser = {
-                        id: String(providerId),
+                        id: userId,
                         name: userName,
                         avatar: avatarUrl,
-                        isAdmin: String(providerId) === String(ADMIN_DISCORD_ID)
+                        isAdmin: userId === ADMIN_UUID
                     };
                 }
             } catch (err) {
