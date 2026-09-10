@@ -308,7 +308,7 @@
                         description: item.description || "Full Auto supported game.",
                         thumbnail: item.thumbnail || "https://tr.rbxcdn.com/180DAY-74e3238344382f02297e172c0366b7a5/768/432/Image/Webp/noFilter",
                         features: item.features || ["Full Auto"],
-                        status: item.status || item.game_status || "Working",
+                        status: item.status || "Working",
                         views: item.views || 0,
                         updatedAt: item.updated_at ? new Date(item.updated_at).toLocaleDateString() : "Recent"
                     }));
@@ -726,7 +726,6 @@
             try {
                 const featuresArray = featuresInput ? featuresInput.split(',').map(s => s.trim()) : ["Full Auto"];
                 
-                // สั่งอัปเดตทั้งฟิลด์ status ปกติและสำรองเผื่อตารางชื่ออื่น
                 const updatePayload = {
                     place_id: placeId,
                     name: name,
@@ -738,18 +737,19 @@
 
                 const { data, error } = await supabaseClient.from('games').update(updatePayload).eq('id', id).select();
 
-                if (error) {
-                    console.error("Supabase Update Error:", error);
-                    throw error;
-                }
+                if (error) throw error;
 
-                console.log("Update success response:", data);
                 statusEl.textContent = "✅ Game updated successfully!";
                 statusEl.className = "text-xs text-center text-emerald-400 mt-2";
-                await initGames();
-                setTimeout(() => router.navigate('detail', slugify(name)), 1500);
+                
+                // ดึงข้อมูลเกมใหม่ในเครื่องทันที ป้องกันจังหวะหน่วง
+                await initGames(false);
+
+                setTimeout(() => {
+                    router.navigate('detail', slugify(name));
+                }, 1000);
             } catch (err) {
-                console.error("Catch Error:", err);
+                console.error("Update Error:", err);
                 statusEl.textContent = "❌ Failed: " + (err.message || "Unknown error");
                 statusEl.className = "text-xs text-center text-red-400 mt-2";
                 btn.disabled = false;
