@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SENZY HUB</title>
+    <title>SENZY HUB </title>
     
     <!-- Link Preview Meta Tags -->
     <meta property="og:title" content="SENZY HUB">
@@ -179,6 +179,9 @@
                 await initGames(false);
                 updateNavbarAuth();
                 setupRealtimeSubscriptions();
+
+                // สั่งเปิดหน้า Home ทันทีที่โหลดเสร็จ
+                router.navigate('home');
 
                 hideLoader();
 
