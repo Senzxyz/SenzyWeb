@@ -53,12 +53,14 @@
     <!-- Global Loading Overlay -->
     <div id="global-loader" class="fixed inset-0 z-50 bg-[#070709] flex flex-col items-center justify-center space-y-4 transition-opacity duration-300">
         <div class="relative">
-            <img src="https://raw.githubusercontent.com/senzxyz2xxx/SenzyHub/refs/heads/main/senz2.png" class="w-16 h-16 rounded-full border-2 border-pink-500 animate-pulse object-cover shadow-lg shadow-pink-500/30" />
-            <div class="absolute inset-0 rounded-full border-4 border-pink-500 border-t-transparent animate-spin"></div>
+            <a href="https://senzyhub.vercel.app/#">
+                <img src="https://raw.githubusercontent.com/senzxyz2xxx/SenzyHub/refs/heads/main/senz2.png" class="w-16 h-16 rounded-full border-2 border-pink-500 animate-pulse object-cover shadow-lg shadow-pink-500/30" />
+            </a>
+            <div class="absolute inset-0 rounded-full border-4 border-pink-500 border-t-transparent animate-spin pointer-events-none"></div>
         </div>
         <div class="text-center space-y-1">
             <p class="text-sm font-bold tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-pink-600">SENZY HUB</p>
-            <p class="text-xs text-neutral-500 animate-pulse">Loading database configurations...</p>
+            <p class="text-xs text-neutral-500 animate-pulse"><a href="https://senzyhub.vercel.app/#" class="hover:underline">Loading</a></p>
         </div>
     </div>
 
@@ -178,7 +180,6 @@
                 updateNavbarAuth();
                 setupRealtimeSubscriptions();
 
-                // ซ่อนหน้า Loading ทันทีที่โหลดข้อมูลเสร็จ
                 hideLoader();
 
             } catch (err) {
