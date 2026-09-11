@@ -50,7 +50,19 @@
 </head>
 <body class="bg-[#070709] text-white min-h-screen flex flex-col antialiased">
 
-    <header class="sticky top-0 z-50 bg-[#0a0a0c]/80 backdrop-blur-md border-b border-pink-500/10">
+    <!-- Global Loading Overlay -->
+    <div id="global-loader" class="fixed inset-0 z-50 bg-[#070709] flex flex-col items-center justify-center space-y-4 transition-opacity duration-300">
+        <div class="relative">
+            <img src="https://raw.githubusercontent.com/senzxyz2xxx/SenzyHub/refs/heads/main/senz2.png" class="w-16 h-16 rounded-full border-2 border-pink-500 animate-pulse object-cover shadow-lg shadow-pink-500/30" />
+            <div class="absolute inset-0 rounded-full border-4 border-pink-500 border-t-transparent animate-spin"></div>
+        </div>
+        <div class="text-center space-y-1">
+            <p class="text-sm font-bold tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-pink-600">SENZY HUB</p>
+            <p class="text-xs text-neutral-500 animate-pulse">Loading database configurations...</p>
+        </div>
+    </div>
+
+    <header class="sticky top-0 z-40 bg-[#0a0a0c]/80 backdrop-blur-md border-b border-pink-500/10">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
             <a href="#" onclick="router.navigate('home')" class="flex items-center space-x-2 cursor-pointer">
                 <img src="https://raw.githubusercontent.com/senzxyz2xxx/SenzyHub/refs/heads/main/senz2.png" class="w-8 h-8 rounded-full border border-pink-500/30 object-cover" />
@@ -162,12 +174,24 @@
                 await fetchDiscordProfile();
                 await fetchStats();
                 await incrementViews();
-                await initGames();
+                await initGames(false);
                 updateNavbarAuth();
                 setupRealtimeSubscriptions();
 
+                // ซ่อนหน้า Loading ทันทีที่โหลดข้อมูลเสร็จ
+                hideLoader();
+
             } catch (err) {
                 console.error("Initialization error:", err);
+                hideLoader();
+            }
+        }
+
+        function hideLoader() {
+            const loader = document.getElementById('global-loader');
+            if (loader) {
+                loader.style.opacity = '0';
+                setTimeout(() => loader.remove(), 300);
             }
         }
 
@@ -495,14 +519,10 @@
                             <h3 class="text-xl font-bold text-white">${siteConfig.ownerName}</h3>
                             <p class="text-xs text-pink-400 font-mono font-semibold">Lead Developer & Scripter</p>
                             <p class="text-xs text-neutral-400 max-w-md mx-auto leading-relaxed pt-2">
-                                Open for custom script commissions, bug fixes, UI development, and project collaborations. Feel free to add me on Discord to discuss your project!
+                                Open for custom script commissions, bug fixes, UI development, and project collaborations. Feel free to join our community server or reach out on Discord!
                             </p>
                         </div>
                         <div class="w-full pt-4 border-t border-white/[0.06] flex flex-col sm:flex-row justify-center items-center gap-4">
-                            <a href="https://discord.com/channels/@me/${siteConfig.ownerId}" target="_blank" rel="noopener noreferrer" class="w-full sm:w-auto px-6 py-3 rounded-lg bg-[#5865F2] hover:bg-[#4752C4] text-white font-semibold text-sm transition-all shadow-lg shadow-[#5865F2]/30 flex items-center justify-center space-x-2">
-                                <i data-lucide="user-plus" class="w-4 h-4"></i>
-                                <span>Add Friend / DM on Discord</span>
-                            </a>
                             <a href="${siteConfig.discordUrl}" target="_blank" rel="noopener noreferrer" class="w-full sm:w-auto px-6 py-3 rounded-lg bg-pink-500 hover:bg-pink-600 text-white font-semibold text-sm transition-all shadow-lg shadow-pink-500/25 flex items-center justify-center space-x-2">
                                 <i data-lucide="message-square" class="w-4 h-4"></i>
                                 <span>Join Community Server</span>
@@ -724,13 +744,11 @@
             btn.disabled = true;
 
             try {
-                // ค้นหาเกมเดิมในเครื่องเพื่อดึงยอด views เดิมติดตัวไปด้วย
                 const existingGame = loadedGames.find(g => g.id == id);
                 const currentViews = existingGame ? (existingGame.views || 0) : 0;
 
                 const featuresArray = featuresInput ? featuresInput.split(',').map(s => s.trim()) : ["Full Auto"];
                 
-                // ส่งข้อมูลอัปเดตพร้อมแนบยอด views เดิมกลับลงไปในฐานข้อมูลด้วย ป้องกันวิวหาย
                 const updatePayload = {
                     place_id: placeId,
                     name: name,
